@@ -207,7 +207,7 @@ void setup()
 
   E_L_PID.Kp = 0.35; //0.8;
   E_L_PID.Ki = 0.1; //0.2
-  E_L_PID.Kd = 0.3; //0.7;
+  E_L_PID.Kd = 0.3; //0.3; //0.7;
 
   E_R_PID.Kp = 0.4; //0.4;
   E_R_PID.Ki = 0.1; //0.1;
@@ -236,14 +236,15 @@ int i = 0;
 void loop()
 {
 
-/* DEBUG CODE
+// DEBUG CODE
   if ((millis() - waitTimer[0]) > 200)
   {
     //IR_Sensor();
 
     //Forward(U_PID.pid);
     //Leftward(E_L_PID.pid, E_R_PID.pid);
-    //Forward(E_L_PID.pid, E_R_PID.pid);
+    Forward(E_L_PID.pid, 0); //, E_R_PID.pid);
+    
 
 
 
@@ -287,11 +288,11 @@ void loop()
   //     }
   //
   //   }
-*/
-        Serial.print("Counter: ");
-        Serial.println(counter);
+
+//        Serial.print("Counter: ");
+//        Serial.println(counter);
         
-  switch (counter)
+/*  switch (counter)
   {
     // 
 //case 0 :
@@ -839,11 +840,16 @@ case 14 :
       
     default:
       counter = counter;
-  }
+  }*/
 
   // Updates all variables for calculations every 100 ms
   if ((millis() - waitTimer[1]) > 50)
   {
+    Serial.print (targetSpeed); //whl_L.curr_AngVel); //robo.curr_LinVel);
+    Serial.print ("\t");
+    Serial.print (whl_L.curr_AngVel);
+    Serial.print ("\t");
+    Serial.println(E_L_PID.pid);
     cli();
     long EL = ECount_L;
     long ER = ECount_R;
