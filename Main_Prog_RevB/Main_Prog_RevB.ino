@@ -30,6 +30,9 @@
 #define ENCOD3_PIN_R 27
 #define ENCOD4_PIN_R 28
 
+#define MAX_DISTANCE 20
+#define MIN_DISTANCE 2
+
 
 //IR Sensor Definitions
 #define IR_Servo_Reading 36    //IR Servo reading
