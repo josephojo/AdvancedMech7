@@ -278,14 +278,10 @@ void loop()
 //        Serial.print("Counter: ");
 //        Serial.println(counter);
 //        
- switch (counter)
-  {
-
-  case 0 :
-    if (true) {
-      Forward(IR_R_PID.pid);
-    }
-    
+//  switch (counter)
+//  {
+//    // 
+////case 0 :
 //////        Serial.print("Rigt: ");
 //////        Serial.print(IR_Val_R);
 //////        Serial.print("\t");
@@ -889,6 +885,14 @@ void loop()
 
     //    robo.curr_Pos = roboDist();
 
+    // Update Distances travelled by both wheels in mm
+    //    whl_L.curr_LinDist = whl_Dist_L();
+    //    whl_R.curr_LinDist = whl_Dist_R();
+
+    // Update linear Wheel Velocities in mm/sec
+    //    whl_L.curr_LinVel = whl_LinVel_L(whl_L, tim_L);
+    //    whl_R.curr_LinVel = whl_LinVel(whl_R, tim_R);
+
     // Update Delta Distance
     robo.del_Dist = roboDel_Dist();
 
@@ -905,6 +909,15 @@ void loop()
 
     Distance_IRFront = IR_Sensor(IR_Front_Reading);
     Distance_IRServo = IR_Sensor(IR_Servo_Reading);
+    
+    // Update Robot Velocity
+    //    robo.curr_LinVel = roboVel();
+
+    // Update Robot Acceleration
+    //    robo.curr_Acc = roboAcc();
+
+    // Update Turn Radius
+    //    robo.turn_Radius = turn_Radius();
 
     prevvy = robo.curr_Orien;
     //    Serial.print("robo.prev_Orien : "); //whl_L.curr_AngVel : ");
