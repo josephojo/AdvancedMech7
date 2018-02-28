@@ -232,6 +232,7 @@ int i = 0;
 
 void loop()
 {
+  IRtest();
 /* TESTING CODE 
  * Don't remove!!!!!!
  * - -----------------------------------------------------------------------------------------------
@@ -741,6 +742,8 @@ void TurnLeft_Ang(uint8_t ang){ // Angle used to be -90 + 7
 
 // Move Arm until Angle is reached
 void MoveArm_Ang(double ang){
+  Arm_Servo.write(0);
+  Arm_Servo.write(90);
   
 }
 
@@ -812,9 +815,6 @@ void IRtest() {
 }
 
 // -------------------- Robot Localization Functions --------------------
-
-// Hi there
-
 
 // -------------------- PID Functions --------------------
 
