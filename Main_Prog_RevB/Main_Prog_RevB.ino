@@ -294,27 +294,51 @@ void loop()
   {
     if(detour == false)
     {
+      // --------- Robot Movement --------
        if(caseStep[counter][0] == 1) // If asked to go forward
        {
+          if(caseStep[counter][7] == 1){ //If asked to stop when left IR doesn't see a wall
+            
+              GoForward_IR_L(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
+            
+          }else if(caseStep[counter][8] == 1){ //If asked to stop when right IR doesn't see a wall
+            
+              GoForward_IR_R(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
+            
+          }else if(caseStep[counter][11] == 1){ //If asked to stop when front IR sees a wall
+            
+              GoForward_IR_F(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
+            
+          }else if(caseStep[counter][9] > 0){ //If asked to stop after a distance
+            
+              GoForward_Dist(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4], (double)caseStep[counter][9]);
+              
+          }else {Serial.println("Go Forward - No Condition to stop was given!!");}
           
-       }eles if(caseStep[counter][1] == 1) // If asked to go Backward
+       }
+       else if(caseStep[counter][1] == 1) // If asked to go Backward
        {
           
-       }else if(caseStep[counter][2] == 1) // If asked to Turn right
+       }
+       else if(caseStep[counter][2] == 1) // If asked to Turn right
        {
           
-       }else if(caseStep[counter][3] == 1) // If asked to Turn Left
+       }
+       else if(caseStep[counter][3] == 1) // If asked to Turn Left
        {
           
-       }else {caseStep[counter][19] == 1}
-  
+       }
+       else {caseStep[counter][19] == 1;}
+
+
+  // ---------- Arm Movement -------
        if(caseStep[counter][12] == 1) // If asked to Move Arm
        {
           
        }else if(caseStep[counter][13] == 1) // If asked to Reset Arm Location
        {
           
-       }else{caseStep[counter][20] == 1}
+       }else{caseStep[counter][20] == 1;}
   
        if(caseStep[counter][15] == 1) // If asked to Grip
        {
@@ -322,7 +346,7 @@ void loop()
        }else if(caseStep[counter][16] == 1) // If asked to Release Grip
        {
           
-       }else {caseStep[counter][18] == 1}
+       }else {caseStep[counter][18] == 1;}
   
        if(caseStep[counter][16] == 1) // If asked to Scan
        {
