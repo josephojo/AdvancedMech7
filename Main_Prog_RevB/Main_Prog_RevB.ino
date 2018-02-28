@@ -30,15 +30,16 @@
 #define ENCOD3_PIN_R 27
 #define ENCOD4_PIN_R 28
 
-#define MAX_DISTANCE 20
-#define MIN_DISTANCE 2
-
-
 //IR Sensor Definitions
 #define IR_Servo_Reading 36    //IR Servo reading
 #define IR_Left_Reading 35    //IR Front reading
 #define IR_Front_Reading 34    //IR Front reading
 #define IR_Right_Reading 33    //IR Front reading
+
+
+#define MAX_DISTANCE 20.0
+#define MIN_DISTANCE 2.0
+
 
 // -------------------- Variable Definitions --------------------
 
@@ -150,16 +151,22 @@ PID E_R_PID;
 // #################### MISC ####################
 const double pi = 3.14159265359;
 double waitTimer[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
-int targetPWM = 70; // Baseline pwm for main motors
+uint8_t targetPWM = 70; // Baseline pwm for main motors
 double targetSpeed = 1.7; // Baseline rotational speed for main motors (in rad/sec)
 const double wall_Length = 17.8; // distance from pillar to pillar in cms
-int counter = 1;
-bool completed = false;
-int targetDist = 5;
+uint8_t counter = 1;
+bool detour = false;
+float targetDist_Side = 5.0;
+float targetDist_Front = 8.0;
 double prev_Dist = 0.0 ;
 double prev_Ang = 0.0;
 
 double prevvy = 0.0;
+
+double caseStep [][18] = {
+                           {    },
+                           {    },
+                                    };
 
 // ************************* End of Definitions *********************************
 
@@ -223,7 +230,9 @@ int i = 0;
 
 void loop()
 {
-/* DEBUG CODE
+/* TESTING CODE 
+ * Don't remove!!!!!!
+ * - -----------------------------------------------------------------------------------------------
   if ((millis() - waitTimer[0]) > 200)
   {
     //IR_Sensor();
@@ -274,559 +283,65 @@ void loop()
   //     }
   //
   //   }
+* - -----------------------------------------------------------------------------------------------
 */
+
+
 //        Serial.print("Counter: ");
 //        Serial.println(counter);
-//        
-//  switch (counter)
-//  {
-//    // 
-////case 0 :
-//////        Serial.print("Rigt: ");
-//////        Serial.print(IR_Val_R);
-//////        Serial.print("\t");
-//////        Serial.print("R - Error: ");
-//////        Serial.print(IR_R_PID.error);
-//////        Serial.print("\t");
-//////        Serial.print("R - PID Val: ");
-//////        Serial.println(IR_R_PID.pid);
-////Serial.print("Speed left: ");
-////
-////        Serial.print(whl_L.curr_AngVel);
-////        Serial.print("\t");
-////        Serial.print("Speed Right ");
-////        Serial.println(whl_R.curr_AngVel);
-////Forward(-IR_L_PID.pid);
-////break;
-//    
-//// Stop and proceed to the next when the robot sees an opening to it's left
-//    case 1 :
-//      if (IR_Val_L < 20  )
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//
-////        //Serial.print("\t");
-////        Serial.print("Left: ");
-////        Serial.println(IR_Val_L);
-//        //        Serial.print("Right: ");
-//        //        Serial.println(IR_Val_R);
-//      }
-//      else {
-//        robo_Halt();
-//
-//        counter++;
-//        //delay(100);
-//        prev_Dist = robo.curr_xPos;
-////        Serial.print("prev_Dist: ");
-////        Serial.println(prev_Dist);
-//      }
-//      break;
-//
-//    // Stop and proceed to the next when the robot moves forward 75 mm
-//    // to center itself for turning at 1
-//    case 2 :
-//      Forward(E_L_PID.pid, E_R_PID.pid);
-//      Serial.print("robo.curr_xPos - prev_Dist: ");
-//        Serial.println(robo.curr_xPos - prev_Dist);
-//      if ((robo.curr_xPos - prev_Dist) > 75)
-//      {
-//        robo_Halt();
-//        counter++;
-//        //delay(100);
-//        prev_Ang = robo.curr_Orien;
-//      }
-//      break;
-//    // Stop and proceed to the next when the robot rotates approximately 90 degs
-//    // to the left at 1
-//    case 3 :
-//      Leftward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) < -90 + 7)
-//      {
-//        robo_Halt();
-//        counter++;
-//      }
-//      break;
-//
-//    // Stop and proceed to the next when the robot's  front IR sensor is 8 cm away at 1
-//    case 4 :
-////      Serial.print("Distance_IRFront: ");
-////      Serial.println(Distance_IRFront);
-//      if (Distance_IRFront > 8)
-//      {
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//      }
-//      break;
-//
-//    // Stop and proceed to the next when the robot rotates approximately 90 degs
-//    // to the right at 2
-//    case 5 :
-//      Rightward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) > 90 - 10)
-//      {
-//        robo_Halt();
-//        counter++;
-//      }
-//      break;
-//
-//    // Stop and proceed to the next when the robot's  front IR sensor is 8 cm away at 2
-//    case 6 :
-//      if (Distance_IRFront > 8)
-//      {
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//      }
-//      break;
-//    // Stop and proceed to the next when the robot rotates approximately 90 degs
-//    // to the left at 2
-//    case 7:
-//
-//      Leftward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) < -90 + 13)
-//      {
-//        robo_Halt();
-//        counter++;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot's  front IR sensor is 8 cm on a long strecth from 2 - 3
-//    case 8 :
-//      if (Distance_IRFront > 8)
-//      {
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the left at 3
-//    case 9 :
-//      Leftward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) < -90 + 7)
-//      {
-//        robo_Halt();
-//        counter++;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot's  front IR sensor is 8 cm on a long strecth from 3 - 4
-//    case 10 :
-//    Serial.println(Distance_IRFront);
-//      if (Distance_IRFront > 8)
-//      {
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the right at 4
-//    case 11 :
-//      Rightward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) > 90 - 10)
-//      {
-//        robo_Halt();
-//        counter++;
-//      }
-//// ** Working so far till the turm at 4
-//break;
-//
-//// Stop and proceed to the next when the robot's  front IR sensor is 8 cm on a short strecth at 4
-//    case 12 :
-//    Serial.println(Distance_IRFront);
-//      if (Distance_IRFront > 8)
-//      {
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        //prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the right between 4 and 5
-//    case 13 :
-//    Serial.println("Hello");
-//      Rightward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) > 90 - 10)
-//      {
-//        robo_Halt();
-//        counter++;
-//        //prev_Ang = robo.curr_Orien;
-//        //prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-////   case 14 :
-////    Serial.println(Distance_IRFront);
-////      if (Distance_IRFront > 8)
-////      {
-////        Forward(E_L_PID.pid, E_R_PID.pid);
-////      }
-////      else {
-////        robo_Halt();
-////        counter++;
-////        //prev_Ang = robo.curr_Orien;
-////        prev_Dist = robo.curr_xPos;
-////      }
-////      break;
-////      
-//case 14 :
-//      if (IR_Val_L < 20  )
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//
-////        //Serial.print("\t");
-////        Serial.print("Left: ");
-////        Serial.println(IR_Val_L);
-//        //        Serial.print("Right: ");
-//        //        Serial.println(IR_Val_R);
-//      }
-//      else {
-//        robo_Halt();
-//
-//        counter++;
-//        //delay(100);
-//        prev_Dist = robo.curr_xPos;
-//        Serial.print("prev_Dist: ");
-//        Serial.println(prev_Dist);
-//      }
-//      break;
-//
-//    // Stop and proceed to the next when the robot moves forward 75 mm
-//    // to center itself for turning at 1
-//    case 15 :
-//      Forward(E_L_PID.pid, E_R_PID.pid);
-//      Serial.print("robo.curr_xPos : ");
-//        Serial.println(robo.curr_xPos);
-//      if ((prev_Dist - robo.curr_xPos) > 75)
-//      {
-//        robo_Halt();
-//        counter++;
-//        //delay(100);
-//        prev_Ang = robo.curr_Orien;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the left at 5
-//    case 16 :
-//      Leftward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) < -90 + 7)
-//      {
-//        robo_Halt();
-//        counter++;
-//        //prev_Ang = robo.curr_Orien;
-//        //prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot's  front IR sensor is 8 cm away at 5
-//    case 17 :
-//      if (Distance_IRFront > 8)
-//      {
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        //prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the right between 5 and 6 (Turning to the ramp)
-//    case 18 :
-//      Rightward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) > 90 - 10)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot sees an opening to it's Right while moving from 5 - 6
-//    case 19 :
-//      if (IR_Val_R < 20  )
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot's front IR sensor is 8 cm away at 6
-//    case 20 :
-//      if (Distance_IRFront > 8)
-//      {
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the right at 6 (Turning on the ramp)
-//    case 21 :
-//      Rightward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) > 90 - 10)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot's front IR sensor is 8 cm away at 7 (Going from 6-7)
-//    case 22 :
-//      if (Distance_IRFront > 8)
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the right at 7 (Turning on the ramp)
-//    case 23 :
-//      Rightward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) > 90 - 10)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot sees an opening to it's Right while moving from 7 - 8
-//    case 24 :
-//      if (IR_Val_R < 20  )
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot moves forward 75 mm
-//// to center itself for turning at 8
-//    case 25 :
-//      Forward(E_L_PID.pid, E_R_PID.pid);
-//      if ((robo.curr_xPos - prev_Dist) > 75)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the right at 8
-//    case 26 :
-//      Rightward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) > 90 - 10)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot's front IR sensor is 8 cm away at 8 
-//    case 27 :
-//      if (Distance_IRFront > 8)
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the left before 9
-//    case 28 :
-//      Leftward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) < -90 + 7)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot's front IR sensor is 8 cm away at (9) 
-//    case 29 :
-//      if (Distance_IRFront > 8)
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot moves forward 255 mm
-//// to make it from 9 to 10
-//    case 30 :
-//      //Forward(IR_L_PID.pid);
-//      Forward(E_L_PID.pid, E_R_PID.pid);
-//      if ((robo.curr_xPos - prev_Dist) > 300)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//      
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the right at 10
-//    case 31 :
-//      Rightward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) > 90 - 10)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot's front IR sensor is 8 cm away at (11) 
-//    case 32 :
-//      if (Distance_IRFront > 8)
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;      
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the left at 11
-//    case 33 :
-//      Leftward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) < -90 + 7)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot moves forward 178 mm
-//// to make it from 11 to 12
-//    case 34 :
-//      //Forward(IR_R_PID.pid);
-//      Forward(E_L_PID.pid, E_R_PID.pid);
-//      if ((robo.curr_xPos - prev_Dist) > 170)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot rotates approximately 90 degs
-//// to the left at 12
-//    case 35 :
-//      Leftward(E_L_PID.pid, E_R_PID.pid);
-//      if (rad2Deg(robo.curr_Orien - prev_Ang) < -90 + 7)
-//      {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;
-//
-//// Stop and proceed to the next when the robot's front IR sensor is 8 cm away at (13) 
-//    case 36 :
-//      if (Distance_IRFront > 8)
-//      {
-//        //Forward(IR_R_PID.pid);
-//        Forward(E_L_PID.pid, E_R_PID.pid);
-//      }
-//      else {
-//        robo_Halt();
-//        counter++;
-//        prev_Ang = robo.curr_Orien;
-//        prev_Dist = robo.curr_xPos;
-//      }
-//      break;  
-//// Notify completion
-//    case 37 :
-//      IR_Servo_Scan();
-//      break;        
-//      
-//    default:
-//      counter = counter;
-//  }
+
+  if ((millis() - waitTimer[2]) > 200)
+  {
+    if(detour == false)
+    {
+       if(caseStep[counter][0] == 1) // If asked to go forward
+       {
+          
+       }eles if(caseStep[counter][1] == 1) // If asked to go Backward
+       {
+          
+       }else if(caseStep[counter][2] == 1) // If asked to Turn right
+       {
+          
+       }else if(caseStep[counter][3] == 1) // If asked to Turn Left
+       {
+          
+       }else {caseStep[counter][19] == 1}
+  
+       if(caseStep[counter][12] == 1) // If asked to Move Arm
+       {
+          
+       }else if(caseStep[counter][13] == 1) // If asked to Reset Arm Location
+       {
+          
+       }else{caseStep[counter][20] == 1}
+  
+       if(caseStep[counter][15] == 1) // If asked to Grip
+       {
+          
+       }else if(caseStep[counter][16] == 1) // If asked to Release Grip
+       {
+          
+       }else {caseStep[counter][18] == 1}
+  
+       if(caseStep[counter][16] == 1) // If asked to Scan
+       {
+          
+       }
+       
+       if(caseStep[counter][18] == 1 && caseStep[counter][19] == 1 && caseStep[counter][20] == 1) { counter++; }
+    }
+
+     if(detour == true)
+     {
+      
+     }
+
+     prev_Ang = robo.curr_Orien;
+     prev_Dist = robo.curr_xPos;
+        
+     waitTimer[2] = millis();
+  }
 
   // Updates all variables for calculations every 100 ms
   if ((millis() - waitTimer[1]) > 50)
@@ -875,24 +390,6 @@ void loop()
     E_R_PID.pid = (E_R_PID.Kp * E_R_PID.error) + (E_R_PID.Ki * E_R_PID.integral) + (E_R_PID.Kd * E_R_PID.derivative);
     E_R_PID.lastError = E_R_PID.error;
 
-
-
-    //  Serial.print ("whl_L.curr_AngVel : ");
-    //  Serial.print (whl_L.curr_AngVel);
-    // Serial.print ("\t");
-    //Serial.print ("U_PID.error : ");
-    // Serial.println (U_PID.error);
-
-    //    robo.curr_Pos = roboDist();
-
-    // Update Distances travelled by both wheels in mm
-    //    whl_L.curr_LinDist = whl_Dist_L();
-    //    whl_R.curr_LinDist = whl_Dist_R();
-
-    // Update linear Wheel Velocities in mm/sec
-    //    whl_L.curr_LinVel = whl_LinVel_L(whl_L, tim_L);
-    //    whl_R.curr_LinVel = whl_LinVel(whl_R, tim_R);
-
     // Update Delta Distance
     robo.del_Dist = roboDel_Dist();
 
@@ -909,22 +406,12 @@ void loop()
 
     Distance_IRFront = IR_Sensor(IR_Front_Reading);
     Distance_IRServo = IR_Sensor(IR_Servo_Reading);
-    
-    // Update Robot Velocity
-    //    robo.curr_LinVel = roboVel();
-
-    // Update Robot Acceleration
-    //    robo.curr_Acc = roboAcc();
-
-    // Update Turn Radius
-    //    robo.turn_Radius = turn_Radius();
 
     prevvy = robo.curr_Orien;
     //    Serial.print("robo.prev_Orien : "); //whl_L.curr_AngVel : ");
     //    Serial.println (rad2Deg(prevvy));
     robo.prev_xPos = robo.curr_xPos;
     robo.prev_yPos = robo.curr_yPos;
-
 
     waitTimer[1] = millis();
   }
@@ -993,15 +480,28 @@ void Forward(double E_pid_L, double E_pid_R)
   analogWrite(EN_PIN_R, (RpS2pwm_R(targetSpeed - E_pid_R)));
 }
 
-void Backward(int spd_L, int spd_R)
+// Robot Backward function for the IRs
+void Backward(double pidResult)
 {
   digitalWrite(IN1_PIN_L, HIGH);
   digitalWrite(IN2_PIN_L, LOW);
-  analogWrite(EN_PIN_L, spd_L - 14);
+  analogWrite(EN_PIN_L, (RpS2pwm_L(targetSpeed) + pidResult - 9)); //-13
 
   digitalWrite(IN3_PIN_R, HIGH);
   digitalWrite(IN4_PIN_R, LOW);
-  analogWrite(EN_PIN_R, spd_R);
+  analogWrite(EN_PIN_R, (RpS2pwm_R(targetSpeed) - pidResult));
+}
+
+// Robot Backward function for the Encoders
+void Backward(double E_pid_L, double E_pid_R)
+{
+  digitalWrite(IN1_PIN_L, HIGH);
+  digitalWrite(IN2_PIN_L, LOW);
+  analogWrite(EN_PIN_L, (RpS2pwm_L(targetSpeed - E_pid_L)));
+
+  digitalWrite(IN3_PIN_R, HIGH);
+  digitalWrite(IN4_PIN_R, LOW);
+  analogWrite(EN_PIN_R, (RpS2pwm_R(targetSpeed - E_pid_R)));
 }
 
 void Leftward(double E_pid_L, double E_pid_R)
@@ -1033,6 +533,143 @@ void robo_Halt()
   digitalWrite(IN3_PIN_R, LOW);
   digitalWrite(IN4_PIN_R, LOW);
 }
+
+// ################## High Level Robot Control #############
+
+// Go Forward until Dist is reached - uses the selected PID
+void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist){ // dist used to be 75 for centering 
+  if(PID_L_IR == 1){
+    Forward(-IR_L_PID.pid);
+    if (abs(robo.curr_xPos - prev_Dist) > dist)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }else if(PID_R_IR == 1){
+    Forward(IR_R_PID.pid);
+    if (abs(robo.curr_xPos - prev_Dist) > dist)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }else if(PID_encod == 1){
+    Forward(E_L_PID.pid, E_R_PID.pid);
+    if (abs(robo.curr_xPos - prev_Dist) > dist)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }
+}
+
+// Go Forward until Front IR sensor detects a wall - uses the selected PID
+void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
+   if(PID_L_IR == 1){
+    Forward(-IR_L_PID.pid);
+    if (Distance_IRFront <= targetDist_Front)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }else if(PID_R_IR == 1){
+    Forward(IR_R_PID.pid);
+    if (Distance_IRFront <= targetDist_Front)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }else if(PID_encod == 1){
+    Forward(E_L_PID.pid, E_R_PID.pid);
+    if (Distance_IRFront <= targetDist_Front)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }
+}
+
+// Go Forward until Left IR sensor doesn't detect a wall - uses the selected PID
+void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
+    if(PID_L_IR == 1){
+    Forward(-IR_L_PID.pid);
+    if (Distance_IRLeft >= MAX_DISTANCE)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }else if(PID_R_IR == 1){
+    Forward(IR_R_PID.pid);
+    if (Distance_IRLeft >= MAX_DISTANCE)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }else if(PID_encod == 1){
+    Forward(E_L_PID.pid, E_R_PID.pid);
+    if (Distance_IRLeft >= MAX_DISTANCE)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }
+}
+
+// Go Forward until Right IR sensor doesn't detect a wall - uses the selected PID
+void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
+  if(PID_L_IR == 1){
+    Forward(-IR_L_PID.pid);
+    if (Distance_IRRight >= 20.0)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }else if(PID_R_IR == 1){
+    Forward(IR_R_PID.pid);
+    if (Distance_IRRight >= 20.0)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }else if(PID_encod == 1){
+    Forward(E_L_PID.pid, E_R_PID.pid);
+    if (Distance_IRRight >= 20.0)
+    {
+      robo_Halt();
+      caseStep[counter][19] = 1;
+    }
+  }
+}
+
+// Go Backward until Dist is reached - uses the selected PID
+void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist){
+  
+}
+
+// Turn Right until Angle is reached
+void TurnRight_Ang(double ang){
+  
+}
+
+// Turn Left until Angle is reached
+void TurnLeft_Ang(double ang){ // Angle used to be -90 + 7
+  Leftward(E_L_PID.pid, E_R_PID.pid);
+  if (rad2Deg(robo.curr_Orien - prev_Ang) < ang)
+  {
+    robo_Halt();
+    caseStep[counter][19] = 1;
+  }
+}
+// <-------------- End of High Level Robot Control ############
+
+
+// ################## High Level Manipulator Control -------------->
+
+// Move Arm until Angle is reached
+void MoveArm_Ang(double ang){
+  
+}
+
+// <--------------- End of High Level Manipulator Control ############
 
 //-------------------------IR Sensors-------------------------
 double IR_Sensor(int pin) {
@@ -1113,10 +750,10 @@ double encodError(double setVal, Wheel W) {
 
 // Solves for the difference between the left IR sensor and 8cm from left wall
 double IR_L_Error() {
-  int distanceGood_L = 0;
+  float distanceGood_L = 0.0;
 
   IRtest();
-  int IR_Val_L;
+  float IR_Val_L;
   IR_Val_L = Distance_IRLeft;
   delay(10);
   if (IR_Val_L < MAX_DISTANCE && IR_Val_L > MIN_DISTANCE) {
@@ -1133,16 +770,16 @@ double IR_L_Error() {
 //  Serial.print("distanceGood_L: ");
 //  Serial.print(distanceGood_L);
 //  Serial.print("\t");
-  return distanceGood_L - targetDist;
+  return distanceGood_L - targetDist_Side;
 }
 
 
 // Solves for the difference between the right IR sensor and 8cm from right wall
 double IR_R_Error() {
-  int distanceGood_R = 0;
+  float distanceGood_R = 0.0;
 
   IRtest();
-  int IR_Val_R;
+  float IR_Val_R;
   IR_Val_R = Distance_IRRight;
   delay(10);
   if (IR_Val_R < MAX_DISTANCE && IR_Val_R > MIN_DISTANCE) {
@@ -1159,7 +796,7 @@ double IR_R_Error() {
 //  Serial.print("distanceGood_L: ");
 //  Serial.print(distanceGood_L);
 //  Serial.print("\t");
-  return distanceGood_R - targetDist;
+  return distanceGood_R - targetDist_Side;
 }
 
 
