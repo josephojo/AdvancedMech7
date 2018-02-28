@@ -297,7 +297,7 @@ void loop()
        if(caseStep[counter][0] == 1) // If asked to go forward
        {
           
-       }eles if(caseStep[counter][1] == 1) // If asked to go Backward
+       }else if(caseStep[counter][1] == 1) // If asked to go Backward
        {
           
        }else if(caseStep[counter][2] == 1) // If asked to Turn right
@@ -412,6 +412,8 @@ void loop()
     //    Serial.println (rad2Deg(prevvy));
     robo.prev_xPos = robo.curr_xPos;
     robo.prev_yPos = robo.curr_yPos;
+
+    
 
     waitTimer[1] = millis();
   }
@@ -736,9 +738,41 @@ void IRtest() {
   delay(100); //create a delay of 0.1s
 }
 
+//--------------------- IR Average ------------------------------------
+
+double IR_Average(){
+  float IRleftSum;
+  float IRrightSum;
+  float IRfrontSum;
+  float IRscanSum;
+  float IRleftAvg;
+  float IRrightAvg;
+  float IRfrontAvg;
+  float IRscanAvg;
+  for (int i=1; i<= 15; i++){
+    IRtest();
+    IRleftSum = IRleftSum + Distance_IRleft;
+    IRrightSum = IRrightSum + Distance_IRright;
+    IRfrontSum = IRfrontSum + Distance_IRFront;
+    IRscanSum = IRscanSum + Distance_IRServo;
+  }
+
+  IRleftAvg = IRleftSum / 15;
+  IRrightAvg = IRrightSum / 15;
+  IRfrontAvg = IRfrontSum / 15;
+  IRscanAvg = IRscanSum / 15;
+
+  return IRleftAvg;
+  return IRrightAvg;
+  return IRfrontAvg;
+  return IRscanAvg;
+
+}
+
+
 // -------------------- Robot Localization Functions --------------------
 
-// Hi there
+// 
 
 
 // -------------------- PID Functions --------------------
