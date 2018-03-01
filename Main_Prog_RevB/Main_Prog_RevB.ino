@@ -126,12 +126,21 @@ Timer tim_R;
 // #################### IR Sensor Variables ####################
 Servo IR_Servo;
 Servo Arm_Servo;
+Servo Claw_Servo;
 int pos = 0;                            // variable to store the servo position
 
 float Distance_IRServo;
 float Distance_IRLeft;
 float Distance_IRFront;
 float Distance_IRRight;
+float IRleftSum;
+float IRrightSum;
+float IRfrontSum;
+float IRscanSum;
+float IRleftAvg;
+float IRrightAvg;
+float IRfrontAvg;
+float IRscanAvg;
 
 // #################### PID ####################
 struct PID {
@@ -193,10 +202,14 @@ void setup()
   IR_Servo.write(0);                                            // set servo to 0
   Arm_Servo.attach(37);                                            // servo to Digital pin 38
   Arm_Servo.write(0);                                            // set servo to 0
+  Claw_Servo.attach(40);                                            // servo to Digital pin 38
+  Claw_Servo.write(0); 
+    
   pinMode(IR_Servo_Reading, INPUT);
   pinMode(IR_Left_Reading, INPUT);
   pinMode(IR_Front_Reading, INPUT);
   pinMode(IR_Right_Reading, INPUT);
+  
 
   // Setup Interrupts
   attachInterrupt(digitalPinToInterrupt(ENCOD1_PIN_L), Encod_ISR_L, RISING); // interrrupt 1 is data ready
@@ -232,17 +245,17 @@ int i = 0;
 
 void loop()
 {
-  IRtest();
-  /* TESTING CODE
-     Don't remove!!!!!!
-     - -----------------------------------------------------------------------------------------------
-    if ((millis() - waitTimer[0]) > 200)
-    {
-      //IR_Sensor();
+  
+/* TESTING CODE 
+ * Don't remove!!!!!!
+ * - -----------------------------------------------------------------------------------------------
+  if ((millis() - waitTimer[0]) > 200)
+  {
+    //IR_Sensor();
 
-      //Forward(U_PID.pid);
-      //Leftward(E_L_PID.pid, E_R_PID.pid);
-      //Forward(E_L_PID.pid, E_R_PID.pid);
+    //Forward(U_PID.pid);
+    //Leftward(E_L_PID.pid, E_R_PID.pid);
+    //Forward(E_L_PID.pid, E_R_PID.pid);
 
 
 
@@ -289,7 +302,8 @@ void loop()
     - -----------------------------------------------------------------------------------------------
   */
 
-
+  
+  IRtest();
   Serial.print("Counter: ");
   Serial.println(counter);
 
@@ -505,6 +519,7 @@ void Encod_ISR_R()
 
 //---------------- IR Average ----------------
 
+<<<<<<< HEAD
 double IR_Average() {
   float IRleftSum;
   float IRrightSum;
@@ -526,12 +541,6 @@ double IR_Average() {
   IRrightAvg = IRrightSum / 15;
   IRfrontAvg = IRfrontSum / 15;
   IRscanAvg = IRscanSum / 15;
-
-  return IRleftAvg;
-  return IRrightAvg;
-  return IRfrontAvg;
-  return IRscanAvg;
-
 }
 
 // -------------------- Motion Control Functions --------------------
@@ -789,10 +798,13 @@ void TurnLeft_Ang(uint8_t ang) { // Angle used to be -90 + 7
 // ################## High Level Manipulator Control -------------->
 
 // Move Arm until Angle is reached
-void MoveArm_Ang(double ang) {
-  Arm_Servo.write(0);
-  Arm_Servo.write(90);
 
+void MoveArm_Ang(double ang){
+  Arm_Servo.write(ang);  
+}
+
+void MoveClaw_Ang(double ang){
+  Claw_Servo.write(ang);  
 }
 
 // <--------------- End of High Level Manipulator Control ############
@@ -875,7 +887,7 @@ double encodError(double setVal, Wheel W) {
 double IR_L_Error() {
   float distanceGood_L = 0.0;
 
-  IRtest();
+  IR_Average();
   float IR_Val_L;
   IR_Val_L = Distance_IRLeft;
   delay(10);
@@ -901,7 +913,7 @@ double IR_L_Error() {
 double IR_R_Error() {
   float distanceGood_R = 0.0;
 
-  IRtest();
+  IR_Average();
   float IR_Val_R;
   IR_Val_R = Distance_IRRight;
   delay(10);
