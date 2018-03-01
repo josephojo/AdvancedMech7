@@ -240,7 +240,7 @@ int i = 0;
 
 void loop()
 {
-  IRtest();
+  
 /* TESTING CODE 
  * Don't remove!!!!!!
  * - -----------------------------------------------------------------------------------------------
@@ -853,7 +853,7 @@ double encodError(double setVal, Wheel W) {
 double IR_L_Error() {
   float distanceGood_L = 0.0;
 
-  IRtest();
+  IR_Average();
   float IR_Val_L;
   IR_Val_L = Distance_IRLeft;
   delay(10);
@@ -879,7 +879,7 @@ double IR_L_Error() {
 double IR_R_Error() {
   float distanceGood_R = 0.0;
 
-  IRtest();
+  IR_Average();
   float IR_Val_R;
   IR_Val_R = Distance_IRRight;
   delay(10);
