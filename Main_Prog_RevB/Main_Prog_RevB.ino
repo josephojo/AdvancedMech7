@@ -889,7 +889,7 @@ double IR_L_Error() {
 
   IR_Average();
   float IR_Val_L;
-  IR_Val_L = Distance_IRLeft;
+  IR_Val_L = IRleftAvg;
   delay(10);
   if (IR_Val_L < MAX_DISTANCE && IR_Val_L > MIN_DISTANCE) {
     distanceGood_L = IR_Val_L;
@@ -915,7 +915,7 @@ double IR_R_Error() {
 
   IR_Average();
   float IR_Val_R;
-  IR_Val_R = Distance_IRRight;
+  IR_Val_R = IRrightAvg;
   delay(10);
   if (IR_Val_R < MAX_DISTANCE && IR_Val_R > MIN_DISTANCE) {
     distanceGood_R = IR_Val_R;
