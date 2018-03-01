@@ -166,9 +166,9 @@ double prev_Ang = 0.0;
 double prevvy = 0.0;
 
 int caseStep [][NUM_CONDITIONS] = {
-   { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }, 
-   { 1,0,0,0,1,0,0,0,0,300,0,0,0,0,0,0,0,0,0,0,0}
-                                    };
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+  { 1, 0, 0, 0, 1, 0, 0, 0, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
 
 // ************************* End of Definitions *********************************
 
@@ -193,10 +193,10 @@ void setup()
   IR_Servo.write(0);                                            // set servo to 0
   Arm_Servo.attach(37);                                            // servo to Digital pin 38
   Arm_Servo.write(0);                                            // set servo to 0
-  pinMode(IR_Servo_Reading, INPUT); 
-  pinMode(IR_Left_Reading, INPUT);                                  
-  pinMode(IR_Front_Reading, INPUT);   
-  pinMode(IR_Right_Reading, INPUT);                                  
+  pinMode(IR_Servo_Reading, INPUT);
+  pinMode(IR_Left_Reading, INPUT);
+  pinMode(IR_Front_Reading, INPUT);
+  pinMode(IR_Right_Reading, INPUT);
 
   // Setup Interrupts
   attachInterrupt(digitalPinToInterrupt(ENCOD1_PIN_L), Encod_ISR_L, RISING); // interrrupt 1 is data ready
@@ -233,143 +233,153 @@ int i = 0;
 void loop()
 {
   IRtest();
-/* TESTING CODE 
- * Don't remove!!!!!!
- * - -----------------------------------------------------------------------------------------------
-  if ((millis() - waitTimer[0]) > 200)
-  {
-    //IR_Sensor();
+  /* TESTING CODE
+     Don't remove!!!!!!
+     - -----------------------------------------------------------------------------------------------
+    if ((millis() - waitTimer[0]) > 200)
+    {
+      //IR_Sensor();
 
-    //Forward(U_PID.pid);
-    //Leftward(E_L_PID.pid, E_R_PID.pid);
-    //Forward(E_L_PID.pid, E_R_PID.pid);
-
-
-
-    //Serial.print ("time in secs : "); //whl_L.curr_AngVel : ");
-    // Serial.print (millis()/1000.0); //whl_L.curr_AngVel); //robo.curr_LinVel);
-    // Serial.print ("\t");
-    //    Serial.print ("targetSpeed : "); //whl_L.curr_AngVel : ");
-    //    Serial.print (targetSpeed); //whl_L.curr_AngVel); //robo.curr_LinVel);
-    //    Serial.print ("\t");
-    //    Serial.print ("whl_L.curr_AngVel : "); //whl_L.curr_AngVel : ");
-    //    Serial.print (whl_L.curr_AngVel);
-    //    Serial.print ("\t");
-    //    Serial.print ("whl_R.curr_AngVel : "); //whl_L.curr_AngVel : ");
-    //    Serial.println (whl_R.curr_AngVel);
+      //Forward(U_PID.pid);
+      //Leftward(E_L_PID.pid, E_R_PID.pid);
+      //Forward(E_L_PID.pid, E_R_PID.pid);
 
 
-    waitTimer[0] = millis();
-  }
 
-  //  if (robo.curr_xPos > 200 - 0.7)
-  //  {
-  //    robo_Halt();
-  //    Serial.print("robo.curr_Orien : ");
-  //    Serial.println(rad2Deg(robo.curr_Orien));
-  //    while (1) {}
-  //  }
-
-  //   if (rad2Deg(robo.curr_Orien) > 80) //zrobo.curr_xPos > 400)//  //curr_Pos
-  //   {
-  //      waitInSecs(0.01);
-  //      Forward(E_L_PID.pid, E_R_PID.pid);
-  //      Serial.print("robo.curr_xPos : ");
-  //      Serial.print(robo.curr_xPos);
-  //      Serial.print("\t");
-  //      if (robo.curr_xPos > 50)
-  //     {
-  //       robo_Halt();
-  //      Serial.print("robo.curr_Orien : ");
-  //      Serial.println(rad2Deg(robo.curr_Orien));
-  //      while(1){}
-  //     }
-  //
-  //   }
-* - -----------------------------------------------------------------------------------------------
-*/
+      //Serial.print ("time in secs : "); //whl_L.curr_AngVel : ");
+      // Serial.print (millis()/1000.0); //whl_L.curr_AngVel); //robo.curr_LinVel);
+      // Serial.print ("\t");
+      //    Serial.print ("targetSpeed : "); //whl_L.curr_AngVel : ");
+      //    Serial.print (targetSpeed); //whl_L.curr_AngVel); //robo.curr_LinVel);
+      //    Serial.print ("\t");
+      //    Serial.print ("whl_L.curr_AngVel : "); //whl_L.curr_AngVel : ");
+      //    Serial.print (whl_L.curr_AngVel);
+      //    Serial.print ("\t");
+      //    Serial.print ("whl_R.curr_AngVel : "); //whl_L.curr_AngVel : ");
+      //    Serial.println (whl_R.curr_AngVel);
 
 
-        Serial.print("Counter: ");
-        Serial.println(counter);
+      waitTimer[0] = millis();
+    }
+
+    //  if (robo.curr_xPos > 200 - 0.7)
+    //  {
+    //    robo_Halt();
+    //    Serial.print("robo.curr_Orien : ");
+    //    Serial.println(rad2Deg(robo.curr_Orien));
+    //    while (1) {}
+    //  }
+
+    //   if (rad2Deg(robo.curr_Orien) > 80) //zrobo.curr_xPos > 400)//  //curr_Pos
+    //   {
+    //      waitInSecs(0.01);
+    //      Forward(E_L_PID.pid, E_R_PID.pid);
+    //      Serial.print("robo.curr_xPos : ");
+    //      Serial.print(robo.curr_xPos);
+    //      Serial.print("\t");
+    //      if (robo.curr_xPos > 50)
+    //     {
+    //       robo_Halt();
+    //      Serial.print("robo.curr_Orien : ");
+    //      Serial.println(rad2Deg(robo.curr_Orien));
+    //      while(1){}
+    //     }
+    //
+    //   }
+    - -----------------------------------------------------------------------------------------------
+  */
+
+
+  Serial.print("Counter: ");
+  Serial.println(counter);
 
   if ((millis() - waitTimer[2]) > 100)
   {
-    if(detour == false && counter < NUM_CONDITIONS)
+    if (detour == false && counter < NUM_CONDITIONS)
     {
       // --------- Robot Movement --------
-       if(caseStep[counter][0] == 1) // If asked to go forward
-       {
-          if(caseStep[counter][7] == 1){ //If asked to stop when left IR doesn't see a wall
-            
-              GoForward_IR_L(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
-            
-          }else if(caseStep[counter][8] == 1){ //If asked to stop when right IR doesn't see a wall
-            
-              GoForward_IR_R(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
-            
-          }else if(caseStep[counter][11] == 1){ //If asked to stop when front IR sees a wall
-            
-              GoForward_IR_F(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
-            
-          }else if(caseStep[counter][9] > 0){ //If asked to stop after a distance
-            
-              GoForward_Dist(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4], caseStep[counter][9]);
-              //Serial.println(caseStep[counter][9]);
-              
-              
-          }else {Serial.println("Go Forward - No Condition to stop was given!!");}
-          
-       }
-       else if(caseStep[counter][1] == 1) // If asked to go Backward
-       {
-          GoBackward_Dist(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4], (double)caseStep[counter][9]);
-       }
-       else if(caseStep[counter][2] == 1) // If asked to Turn right
-       {
-          TurnRight_Ang(caseStep[counter][10]);
-       }
-       else if(caseStep[counter][3] == 1) // If asked to Turn Left
-       {
-          TurnLeft_Ang(caseStep[counter][10]);
-       }
-       else {caseStep[counter][19] = 1;}
+      if (caseStep[counter][0] == 1) // If asked to go forward
+      {
+        if (caseStep[counter][7] == 1) { //If asked to stop when left IR doesn't see a wall
+
+          GoForward_IR_L(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
+
+        } else if (caseStep[counter][8] == 1) { //If asked to stop when right IR doesn't see a wall
+
+          GoForward_IR_R(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
+
+        } else if (caseStep[counter][11] == 1) { //If asked to stop when front IR sees a wall
+
+          GoForward_IR_F(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
+
+        } else if (caseStep[counter][9] > 0) { //If asked to stop after a distance
+
+          GoForward_Dist(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4], caseStep[counter][9]);
+          //Serial.println(caseStep[counter][9]);
 
 
-  // ---------- Arm Movement -------
-       if(caseStep[counter][12] == 1) // If asked to Move Arm
-       {
-          
-       }else if(caseStep[counter][13] == 1) // If asked to Reset Arm Location
-       {
-          
-       }else{caseStep[counter][20] = 1;}
-  
-       if(caseStep[counter][15] == 1) // If asked to Grip
-       {
-          
-       }else if(caseStep[counter][16] == 1) // If asked to Release Grip
-       {
-          
-       }else {caseStep[counter][18] = 1;}
-  
-       if(caseStep[counter][16] == 1) // If asked to Scan
-       {
-          
-       }
-       
-       if(caseStep[counter][18] == 1 && caseStep[counter][19] == 1 && caseStep[counter][20] == 1) { counter++; }
+        } else {
+          Serial.println("Go Forward - No Condition to stop was given!!");
+        }
+
+      }
+      else if (caseStep[counter][1] == 1) // If asked to go Backward
+      {
+        GoBackward_Dist(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4], (double)caseStep[counter][9]);
+      }
+      else if (caseStep[counter][2] == 1) // If asked to Turn right
+      {
+        TurnRight_Ang(caseStep[counter][10]);
+      }
+      else if (caseStep[counter][3] == 1) // If asked to Turn Left
+      {
+        TurnLeft_Ang(caseStep[counter][10]);
+      }
+      else {
+        caseStep[counter][19] = 1;
+      }
+
+
+      // ---------- Arm Movement -------
+      if (caseStep[counter][12] == 1) // If asked to Move Arm
+      {
+
+      } else if (caseStep[counter][13] == 1) // If asked to Reset Arm Location
+      {
+
+      } else {
+        caseStep[counter][20] = 1;
+      }
+
+      if (caseStep[counter][15] == 1) // If asked to Grip
+      {
+
+      } else if (caseStep[counter][16] == 1) // If asked to Release Grip
+      {
+
+      } else {
+        caseStep[counter][18] = 1;
+      }
+
+      if (caseStep[counter][16] == 1) // If asked to Scan
+      {
+
+      }
+
+      if (caseStep[counter][18] == 1 && caseStep[counter][19] == 1 && caseStep[counter][20] == 1) {
+        counter++;
+      }
     }
 
-     if(detour == true)
-     {
-      
-     }
+    if (detour == true)
+    {
 
-     
-     
-        
-     waitTimer[2] = millis();
+    }
+
+
+
+
+    waitTimer[2] = millis();
   }
 
   // Updates all variables for calculations every 100 ms
@@ -418,6 +428,13 @@ void loop()
     E_R_PID.derivative = E_R_PID.error - E_R_PID.lastError;
     E_R_PID.pid = (E_R_PID.Kp * E_R_PID.error) + (E_R_PID.Ki * E_R_PID.integral) + (E_R_PID.Kd * E_R_PID.derivative);
     E_R_PID.lastError = E_R_PID.error;
+
+    TURN_PID.error = turnError(target);
+    TURN_PID.integral = TURN_PID.integral + TURN_PID.error;
+    TURN_PID.derivative = TURN_PID.error - TURN_PID.lastError;
+    TURN_PID.pid = (TURN_PID.Kp * TURN_PIDID.error) + (TURN_PID.Ki * TURN_PID.integral) + (TURN_PID.Kd * TURN_PID.derivative);
+    TURN_PID.lastError = TURN_PID.error;
+
 
     // Update Delta Distance
     robo.del_Dist = roboDel_Dist();
@@ -488,7 +505,7 @@ void Encod_ISR_R()
 
 //---------------- IR Average ----------------
 
-double IR_Average(){
+double IR_Average() {
   float IRleftSum;
   float IRrightSum;
   float IRfrontSum;
@@ -497,7 +514,7 @@ double IR_Average(){
   float IRrightAvg;
   float IRfrontAvg;
   float IRscanAvg;
-  for (int i=1; i<= 15; i++){
+  for (int i = 1; i <= 15; i++) {
     IRtest();
     IRleftSum = IRleftSum + Distance_IRLeft;
     IRrightSum = IRrightSum + Distance_IRRight;
@@ -600,8 +617,8 @@ void robo_Halt()
 // ################## High Level Robot Control #############
 
 // Go Forward until Dist is reached - uses the selected PID
-void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist){ // dist used to be 75 for centering 
-  if(PID_L_IR == 1){
+void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist) { // dist used to be 75 for centering
+  if (PID_L_IR == 1) {
     Forward(-IR_L_PID.pid);
     if (abs(robo.curr_Pos - prev_Dist) > dist) //x
     {
@@ -609,7 +626,7 @@ void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doubl
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_R_IR == 1){
+  } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
     if (abs(robo.curr_Pos - prev_Dist) > dist)//x
     {
@@ -617,7 +634,7 @@ void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doubl
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_encod == 1){
+  } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
     Serial.println("Heyyy");
     if (abs(robo.curr_Pos - prev_Dist) > dist)//x
@@ -630,8 +647,8 @@ void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doubl
 }
 
 // Go Forward until Front IR sensor detects a wall - uses the selected PID
-void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
-   if(PID_L_IR == 1){
+void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
+  if (PID_L_IR == 1) {
     Forward(-IR_L_PID.pid);
     if (Distance_IRFront <= targetDist_Front)
     {
@@ -639,7 +656,7 @@ void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_R_IR == 1){
+  } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
     if (Distance_IRFront <= targetDist_Front)
     {
@@ -647,7 +664,7 @@ void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_encod == 1){
+  } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
     if (Distance_IRFront <= targetDist_Front)
     {
@@ -659,8 +676,8 @@ void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
 }
 
 // Go Forward until Left IR sensor doesn't detect a wall - uses the selected PID
-void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
-    if(PID_L_IR == 1){
+void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
+  if (PID_L_IR == 1) {
     Forward(-IR_L_PID.pid);
     if (Distance_IRLeft >= MAX_DISTANCE)
     {
@@ -668,7 +685,7 @@ void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_R_IR == 1){
+  } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
     if (Distance_IRLeft >= MAX_DISTANCE)
     {
@@ -676,7 +693,7 @@ void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_encod == 1){
+  } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
     if (Distance_IRLeft >= MAX_DISTANCE)
     {
@@ -688,8 +705,8 @@ void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
 }
 
 // Go Forward until Right IR sensor doesn't detect a wall - uses the selected PID
-void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
-  if(PID_L_IR == 1){
+void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
+  if (PID_L_IR == 1) {
     Forward(-IR_L_PID.pid);
     if (Distance_IRRight >= 20.0)
     {
@@ -697,7 +714,7 @@ void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_R_IR == 1){
+  } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
     if (Distance_IRRight >= 20.0)
     {
@@ -705,7 +722,7 @@ void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_encod == 1){
+  } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
     if (Distance_IRRight >= 20.0)
     {
@@ -717,8 +734,8 @@ void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod){
 }
 
 // Go Backward until Dist is reached - uses the selected PID
-void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist){
-  if(PID_L_IR == 1){
+void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist) {
+  if (PID_L_IR == 1) {
     Backward(-IR_L_PID.pid);
     if (abs(robo.curr_Pos - prev_Dist) > dist)
     {
@@ -726,7 +743,7 @@ void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doub
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_R_IR == 1){
+  } else if (PID_R_IR == 1) {
     Backward(IR_R_PID.pid);
     if (abs(robo.curr_Pos - prev_Dist) > dist)
     {
@@ -734,7 +751,7 @@ void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doub
       prev_Dist = robo.curr_Pos; //x
       caseStep[counter][19] = 1;
     }
-  }else if(PID_encod == 1){
+  } else if (PID_encod == 1) {
     Backward(E_L_PID.pid, E_R_PID.pid);
     if (abs(robo.curr_Pos - prev_Dist) > dist)
     {
@@ -746,7 +763,7 @@ void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doub
 }
 
 // Turn Right until Angle is reached
-void TurnRight_Ang(uint8_t ang){ // Angle used to be 90 - 10
+void TurnRight_Ang(uint8_t ang) { // Angle used to be 90 - 10
   Rightward(E_L_PID.pid, E_R_PID.pid);
   if (rad2Deg(robo.curr_Orien - prev_Ang) > ang)
   {
@@ -757,7 +774,7 @@ void TurnRight_Ang(uint8_t ang){ // Angle used to be 90 - 10
 }
 
 // Turn Left until Angle is reached
-void TurnLeft_Ang(uint8_t ang){ // Angle used to be -90 + 7
+void TurnLeft_Ang(uint8_t ang) { // Angle used to be -90 + 7
   Leftward(E_L_PID.pid, E_R_PID.pid);
   if (rad2Deg(robo.curr_Orien - prev_Ang) < ang)
   {
@@ -772,10 +789,10 @@ void TurnLeft_Ang(uint8_t ang){ // Angle used to be -90 + 7
 // ################## High Level Manipulator Control -------------->
 
 // Move Arm until Angle is reached
-void MoveArm_Ang(double ang){
+void MoveArm_Ang(double ang) {
   Arm_Servo.write(0);
   Arm_Servo.write(90);
-  
+
 }
 
 // <--------------- End of High Level Manipulator Control ############
@@ -792,7 +809,7 @@ double IR_Servo_Scan() {
 
   for (pos = 0; pos <= 40; pos += 1) {          // goes from 0 degrees to 60 degrees
     IR_Servo.write(pos);                           // tell servo to go to position in variable 'pos'
-    if (pos == 0 || pos == 10 || pos == 20 || pos == 30 || pos == 40) {   
+    if (pos == 0 || pos == 10 || pos == 20 || pos == 30 || pos == 40) {
       Distance_IRServo = IR_Sensor(IR_Servo_Reading);
       Serial.print("Servo IR Distance: ");
       Serial.println(Distance_IRServo);
@@ -800,10 +817,10 @@ double IR_Servo_Scan() {
     }
     delay(15);                       // waits 15ms for the servo to reach the position
   }
- 
+
   for (pos = 40; pos >= 0; pos -= 1) {                      // goes from 60 degrees to 0 degrees
     IR_Servo.write(pos);                                     // tell servo to go to position in variable 'pos'
-    if (pos == 0 || pos == 10 || pos == 20 || pos == 30 || pos == 40) {      
+    if (pos == 0 || pos == 10 || pos == 20 || pos == 30 || pos == 40) {
       Distance_IRServo = IR_Sensor(IR_Servo_Reading);
       Serial.print("Servo IR Distance: ");
       Serial.println(Distance_IRServo);
@@ -811,7 +828,7 @@ double IR_Servo_Scan() {
     }
     delay(15);                       // waits 15ms for the servo to reach the position
   }
-} 
+}
 
 void IRtest() {
   double IR_Servo_Value;
@@ -824,7 +841,7 @@ void IRtest() {
   IR_Left_Value = analogRead(IR_Left_Reading); //take reading from sensor
   IR_Front_Value = analogRead(IR_Front_Reading); //take reading from sensor
   IR_Right_Value = analogRead(IR_Right_Reading); //take reading from sensor
-  
+
   float Raw_Voltage_IRServo = IR_Servo_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
   float Distance_IRServo = -30.195 * Raw_Voltage_IRServo + 71.35;
   float Raw_Voltage_IRLeft = IR_Left_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
@@ -833,15 +850,15 @@ void IRtest() {
   float Distance_IRFront = -30.195 * Raw_Voltage_IRFront + 71.35;
   float Raw_Voltage_IRRight = IR_Right_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
   float Distance_IRRight = -30.195 * Raw_Voltage_IRRight + 71.35;
-//  Serial.print("Servo IR Distance: ");
-//  Serial.println(Distance_IRServo);
-//  Serial.print("Left IR Distance: ");
-//  Serial.println(Distance_IRLeft);
-//  Serial.print("Front IR Distance: ");
-//  Serial.println(Distance_IRFront);
-//  Serial.print("Right IR Distance: ");
-//  Serial.println(Distance_IRRight);
-  
+  //  Serial.print("Servo IR Distance: ");
+  //  Serial.println(Distance_IRServo);
+  //  Serial.print("Left IR Distance: ");
+  //  Serial.println(Distance_IRLeft);
+  //  Serial.print("Front IR Distance: ");
+  //  Serial.println(Distance_IRFront);
+  //  Serial.print("Right IR Distance: ");
+  //  Serial.println(Distance_IRRight);
+
   delay(100); //create a delay of 0.1s
 }
 
@@ -873,9 +890,9 @@ double IR_L_Error() {
     IR_Val_L = MAX_DISTANCE;
     distanceGood_L = MAX_DISTANCE;
   }
-//  Serial.print("distanceGood_L: ");
-//  Serial.print(distanceGood_L);
-//  Serial.print("\t");
+  //  Serial.print("distanceGood_L: ");
+  //  Serial.print(distanceGood_L);
+  //  Serial.print("\t");
   return distanceGood_L - targetDist_Side;
 }
 
@@ -899,13 +916,16 @@ double IR_R_Error() {
     IR_Val_R = MAX_DISTANCE;
     distanceGood_R = MAX_DISTANCE;
   }
-//  Serial.print("distanceGood_L: ");
-//  Serial.print(distanceGood_L);
-//  Serial.print("\t");
+  //  Serial.print("distanceGood_L: ");
+  //  Serial.print(distanceGood_L);
+  //  Serial.print("\t");
   return distanceGood_R - targetDist_Side;
 }
 
-
+// Solves for the difference in the angle of the robot compared to a set value (in deg)
+double turnError(double setVal) {
+  return abs(robo.curr_Orien) - setVal;
+}
 
 // -------------------- Formulas --------------------
 
