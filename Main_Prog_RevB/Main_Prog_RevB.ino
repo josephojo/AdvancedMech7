@@ -126,6 +126,7 @@ Timer tim_R;
 // #################### IR Sensor Variables ####################
 Servo IR_Servo;
 Servo Arm_Servo;
+Servo Claw_Servo;
 int pos = 0;                            // variable to store the servo position
 
 float Distance_IRServo;
@@ -201,6 +202,9 @@ void setup()
   IR_Servo.write(0);                                            // set servo to 0
   Arm_Servo.attach(37);                                            // servo to Digital pin 38
   Arm_Servo.write(0);                                            // set servo to 0
+  Claw_Servo.attach(40);                                            // servo to Digital pin 38
+  Claw_Servo.write(0); 
+    
   pinMode(IR_Servo_Reading, INPUT); 
   pinMode(IR_Left_Reading, INPUT);                                  
   pinMode(IR_Front_Reading, INPUT);   
@@ -768,9 +772,11 @@ void TurnLeft_Ang(uint8_t ang){ // Angle used to be -90 + 7
 
 // Move Arm until Angle is reached
 void MoveArm_Ang(double ang){
-  Arm_Servo.write(0);
-  Arm_Servo.write(90);
-  
+  Arm_Servo.write(ang);  
+}
+
+void MoveClaw_Ang(double ang){
+  Claw_Servo.write(ang);  
 }
 
 // <--------------- End of High Level Manipulator Control ############
