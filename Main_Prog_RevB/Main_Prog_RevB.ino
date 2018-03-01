@@ -158,6 +158,7 @@ PID IR_L_PID; // PID for the left IR
 PID IR_R_PID;
 PID E_L_PID;
 PID E_R_PID;
+PID TURN_PID;
 
 // #################### MISC ####################
 const double pi = 3.14159265359;
@@ -443,10 +444,10 @@ void loop()
     E_R_PID.pid = (E_R_PID.Kp * E_R_PID.error) + (E_R_PID.Ki * E_R_PID.integral) + (E_R_PID.Kd * E_R_PID.derivative);
     E_R_PID.lastError = E_R_PID.error;
 
-    TURN_PID.error = turnError(target);
+    TURN_PID.error = turnError(90);
     TURN_PID.integral = TURN_PID.integral + TURN_PID.error;
     TURN_PID.derivative = TURN_PID.error - TURN_PID.lastError;
-    TURN_PID.pid = (TURN_PID.Kp * TURN_PIDID.error) + (TURN_PID.Ki * TURN_PID.integral) + (TURN_PID.Kd * TURN_PID.derivative);
+    TURN_PID.pid = (TURN_PID.Kp * TURN_PID.error) + (TURN_PID.Ki * TURN_PID.integral) + (TURN_PID.Kd * TURN_PID.derivative);
     TURN_PID.lastError = TURN_PID.error;
 
 
@@ -519,7 +520,6 @@ void Encod_ISR_R()
 
 //---------------- IR Average ----------------
 
-<<<<<<< HEAD
 double IR_Average() {
   float IRleftSum;
   float IRrightSum;
