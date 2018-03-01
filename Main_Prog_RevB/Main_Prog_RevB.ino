@@ -132,6 +132,14 @@ float Distance_IRServo;
 float Distance_IRLeft;
 float Distance_IRFront;
 float Distance_IRRight;
+float IRleftSum;
+float IRrightSum;
+float IRfrontSum;
+float IRscanSum;
+float IRleftAvg;
+float IRrightAvg;
+float IRfrontAvg;
+float IRscanAvg;
 
 // #################### PID ####################
 struct PID {
@@ -489,14 +497,7 @@ void Encod_ISR_R()
 //---------------- IR Average ----------------
 
 double IR_Average(){
-  float IRleftSum;
-  float IRrightSum;
-  float IRfrontSum;
-  float IRscanSum;
-  float IRleftAvg;
-  float IRrightAvg;
-  float IRfrontAvg;
-  float IRscanAvg;
+  
   for (int i=1; i<= 15; i++){
     IRtest();
     IRleftSum = IRleftSum + Distance_IRLeft;
@@ -509,12 +510,6 @@ double IR_Average(){
   IRrightAvg = IRrightSum / 15;
   IRfrontAvg = IRfrontSum / 15;
   IRscanAvg = IRscanSum / 15;
-
-  return IRleftAvg;
-  return IRrightAvg;
-  return IRfrontAvg;
-  return IRscanAvg;
-
 }
 
 // -------------------- Motion Control Functions --------------------
