@@ -233,9 +233,9 @@ void setup()
   IR_R_PID.Ki = 0.0; //0.3;
   IR_R_PID.Kd = 2.0;
 
-  TURN_PID.Kp = 0.1; //5.0;
-  TURN_PID.Ki = 0.0; //0.3;
-  TURN_PID.Kd = 0.0;
+  TURN_PID.Kp = 0.3; //5.0;
+  TURN_PID.Ki = 0.005; //0.1; 
+  TURN_PID.Kd = 0.5; //0.2;
 
   robo.prev_Orien = robo.initial_Orien;
   robo.prev_xPos = robo.initial_xPos;
@@ -349,11 +349,13 @@ void loop()
       }
       else if (caseStep[counter][2] == 1) // If asked to Turn right
       {
-        TurnRight_Ang(caseStep[counter][10]);
+        //TurnRight_Ang(caseStep[counter][10]);
+        Turn_Ang(caseStep[counter][10]);
       }
       else if (caseStep[counter][3] == 1) // If asked to Turn Left
       {
-        TurnLeft_Ang(caseStep[counter][10]);
+        //TurnLeft_Ang(caseStep[counter][10]);
+        Turn_Ang(-caseStep[counter][10]);
       }
       else {
         caseStep[counter][19] = 1;
@@ -395,8 +397,10 @@ void loop()
     {
       //Leftward(0);
       //TurnLeft_Ang(-90);
-      //Turn_Ang(-90);
-      Forward(E_L_PID.pid, E_R_PID.pid);
+      if(counter <= 1){
+      Turn_Ang(-90);
+      }
+      //Forward(E_L_PID.pid, E_R_PID.pid);
       //Serial.println("In Detour");
     }
 
@@ -424,9 +428,9 @@ void loop()
     whl_L.curr_AngVel = whl_AngVel_L(delta_L);
     whl_R.curr_AngVel = whl_AngVel_R(delta_R);
 
-Serial.print(whl_R.curr_AngVel);
-Serial.print("\t");
-Serial.println(whl_L.curr_AngVel);
+//Serial.print(whl_R.curr_AngVel);
+//Serial.print("\t");
+//Serial.println(whl_L.curr_AngVel);
     // Update change in wheel distances
     whl_L.del_Dist = whlDeltaD_L(delta_L);
     whl_R.del_Dist = whlDeltaD_R(delta_R);
@@ -461,10 +465,10 @@ Serial.println(whl_L.curr_AngVel);
       //TURN_PID.error = turnError()
       //Serial.print("TURN_PID.pid: ");Serial.println(TURN_PID.pid);
 
-//      TURN_PID.integral = TURN_PID.integral + TURN_PID.error;
-//      TURN_PID.derivative = TURN_PID.error - TURN_PID.lastError;
-//      TURN_PID.pid = (TURN_PID.Kp * TURN_PID.error) + (TURN_PID.Ki * TURN_PID.integral) + (TURN_PID.Kd * TURN_PID.derivative);
-//      TURN_PID.lastError = TURN_PID.error;
+      TURN_PID.integral = TURN_PID.integral + TURN_PID.error;
+      TURN_PID.derivative = TURN_PID.error - TURN_PID.lastError;
+      TURN_PID.pid = (TURN_PID.Kp * TURN_PID.error) + (TURN_PID.Ki * TURN_PID.integral) + (TURN_PID.Kd * TURN_PID.derivative);
+      TURN_PID.lastError = TURN_PID.error;
     //}
 
 
@@ -483,8 +487,8 @@ Serial.println(whl_L.curr_AngVel);
     // Update Robot Orientation
     robo.curr_Orien = roboAngle();
 
-    Distance_IRFront = IR_Sensor(IR_Front_Reading);
-    Distance_IRServo = IR_Sensor(IR_Servo_Reading);
+//    Distance_IRFront = IR_Sensor(IR_Front_Reading);
+//    Distance_IRServo = IR_Sensor(IR_Servo_Reading);
 
     prevvy = robo.curr_Orien;
     //    Serial.print("robo.prev_Orien : "); //whl_L.curr_AngVel : ");
@@ -636,11 +640,11 @@ void Leftward(double pidResult)
 {
   digitalWrite(IN1_PIN_L, HIGH);
   digitalWrite(IN2_PIN_L, LOW);
-  analogWrite(EN_PIN_L, RpS2pwm_L(targetSpeed) + pidResult);
-
+  analogWrite(EN_PIN_L, RpS2pwm_L(targetSpeed) - pidResult);
+Serial.println(RpS2pwm_L(targetSpeed));
   digitalWrite(IN3_PIN_R, LOW);
   digitalWrite(IN4_PIN_R, HIGH);
-  analogWrite(EN_PIN_R, RpS2pwm_R(targetSpeed) + pidResult);
+  analogWrite(EN_PIN_R, RpS2pwm_R(targetSpeed) - pidResult);
 }
 
 void Rightward(double pidResult)
@@ -648,7 +652,7 @@ void Rightward(double pidResult)
   digitalWrite(IN1_PIN_L, LOW);
   digitalWrite(IN2_PIN_L, HIGH);
   analogWrite(EN_PIN_L, RpS2pwm_L(targetSpeed) + pidResult);
-
+ 
   digitalWrite(IN3_PIN_R, HIGH);
   digitalWrite(IN4_PIN_R, LOW);
   analogWrite(EN_PIN_R, RpS2pwm_R(targetSpeed) + pidResult);
@@ -851,25 +855,31 @@ void TurnLeft_Ang(int8_t ang) { // Angle used to be -90 + 7
 
 // Turn until Angle is reached
 void Turn_Ang(int8_t ang) { 
+  double tempSpeed = targetSpeed;
+  targetSpeed = 1.5;
   TURN_PID.error = turnError(ang);
 //  Serial.println("In TurnLeft");
 //  Serial.print("\t");
   Serial.print("TURN_PID.Error: ");Serial.println(TURN_PID.error);
+  Serial.print("TURN_PID.Pid: ");Serial.println(TURN_PID.pid);
 
-  if (TURN_PID.pid < -3)
+  if (TURN_PID.error < -2)
   {
     Leftward(TURN_PID.pid);
-  }else if(TURN_PID.pid > 3)
+    //Serial.println("ello");
+  }else if(TURN_PID.error > 2)
   {
     Rightward(TURN_PID.pid);
   }else
   {
     robo_Halt();
-    //TURN_PID.error = 0.0;
+    TURN_PID.error = 0.0;
     TURN_PID.integral = 0.0;
     TURN_PID.derivative = 0.0;
+    targetSpeed = tempSpeed;
     prev_Dist = robo.curr_Pos;
     prev_Ang = robo.curr_Orien;
+    counter++;
     caseStep[counter][19] = 1;
   }
 }
@@ -909,7 +919,7 @@ double IR_Servo_Scan() {
       Serial.println(Distance_IRServo);
       return Distance_IRServo;
     }
-    delay(15);                       // waits 15ms for the servo to reach the position
+    //delay(15);                       // waits 15ms for the servo to reach the position
   }
 
   for (pos = 40; pos >= 0; pos -= 1) {                      // goes from 60 degrees to 0 degrees
@@ -920,7 +930,7 @@ double IR_Servo_Scan() {
       Serial.println(Distance_IRServo);
       return Distance_IRServo;
     }
-    delay(15);                       // waits 15ms for the servo to reach the position
+    //delay(15);                       // waits 15ms for the servo to reach the position
   }
 }
 
@@ -953,7 +963,7 @@ void IRtest() {
   //  Serial.print("Right IR Distance: ");
   //  Serial.println(Distance_IRRight);
 
-  delay(100); //create a delay of 0.1s
+  //delay(100); //create a delay of 0.1s
 }
 
 // -------------------- Robot Localization Functions --------------------
@@ -972,7 +982,7 @@ double IR_L_Error() {
   IR_Average();
   float IR_Val_L;
   IR_Val_L = IRleftAvg;
-  delay(10);
+  //delay(10);
   if (IR_Val_L < MAX_DISTANCE && IR_Val_L > MIN_DISTANCE) {
     distanceGood_L = IR_Val_L;
   }
@@ -998,7 +1008,7 @@ double IR_R_Error() {
   IR_Average();
   float IR_Val_R;
   IR_Val_R = IRrightAvg;
-  delay(10);
+  //delay(10);
   if (IR_Val_R < MAX_DISTANCE && IR_Val_R > MIN_DISTANCE) {
     distanceGood_R = IR_Val_R;
   }
