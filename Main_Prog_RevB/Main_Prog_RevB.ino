@@ -32,9 +32,9 @@
 
 //IR Sensor Definitions
 #define IR_Servo_Reading 36    //IR Servo reading
-#define IR_Left_Reading 35    //IR Front reading
-#define IR_Front_Reading 34    //IR Front reading
-#define IR_Right_Reading 33    //IR Front reading
+#define IR_Left_Reading 23    //IR Left reading
+#define IR_Front_Reading 17    //IR Front reading
+#define IR_Right_Reading 39    //IR Right reading
 
 
 #define MAX_DISTANCE 20.0
@@ -966,6 +966,57 @@ void IRtest() {
   //delay(100); //create a delay of 0.1s
 }
 
+void IRFront() {
+  double IR_Front_Value;
+ 
+  IR_Front_Value = analogRead(IR_Front_Reading); //take reading from sensor
+
+
+  float Raw_Voltage_IRFront = IR_Front_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
+  float Distance_IRFront = -29.642 * Raw_Voltage_IRFront + 69.236;
+
+    Serial.print("Front IR Distance: ");
+    Serial.println(Distance_IRFront);
+}
+
+void IRRight() {
+  
+  double IR_Right_Value;
+
+  IR_Right_Value = analogRead(IR_Right_Reading); //take reading from sensor
+
+  float Raw_Voltage_IRRight = IR_Right_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
+  float Distance_IRRight = -29.642 * Raw_Voltage_IRRight + 69.236;
+
+  Serial.print("Right IR Distance: ");
+  Serial.println(Distance_IRRight);
+}
+
+void IRLeft() {
+  
+  double IR_Left_Value;
+
+  IR_Left_Value = analogRead(IR_Left_Reading); //take reading from sensor
+
+  float Raw_Voltage_IRLeft = IR_Left_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
+  float Distance_IRLeft = -29.642 * Raw_Voltage_IRLeft + 69.236;
+
+    Serial.print("Left IR Distance: ");
+    Serial.println(Distance_IRLeft);
+}
+
+void IRServo() {
+  
+  double IR_Servo_Value;
+
+  IR_Servo_Value = analogRead(IR_Servo_Reading); //take reading from sensor
+
+  float Raw_Voltage_IRServo = IR_Servo_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
+  float Distance_IRServo = -29.642 * Raw_Voltage_IRServo + 69.236;
+
+    Serial.print("Servo IR Distance: ");
+    Serial.println(Distance_IRServo);
+}
 // -------------------- Robot Localization Functions --------------------
 
 // -------------------- PID Functions --------------------
