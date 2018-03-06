@@ -129,18 +129,10 @@ Servo Arm_Servo;
 Servo Claw_Servo;
 int pos = 0;                            // variable to store the servo position
 
-float Distance_IRServo;
-float Distance_IRLeft;
-float Distance_IRFront;
-float Distance_IRRight;
-float IRleftSum;
-float IRrightSum;
-float IRfrontSum;
-float IRscanSum;
-float IRleftAvg;
-float IRrightAvg;
-float IRfrontAvg;
-float IRscanAvg;
+float Distance_IRServo = 0.0;
+float Distance_IRLeft = 0.0;
+float Distance_IRFront = 0.0;
+float Distance_IRRight = 0.0;
 
 // #################### PID ####################
 struct PID {
@@ -205,13 +197,13 @@ void setup()
   Arm_Servo.attach(37);                                            // servo to Digital pin 38
   Arm_Servo.write(0);                                            // set servo to 0
   Claw_Servo.attach(40);                                            // servo to Digital pin 38
-  Claw_Servo.write(0); 
-    
+  Claw_Servo.write(0);
+
   pinMode(IR_Servo_Reading, INPUT);
   pinMode(IR_Left_Reading, INPUT);
   pinMode(IR_Front_Reading, INPUT);
   pinMode(IR_Right_Reading, INPUT);
-  
+
 
   // Setup Interrupts
   attachInterrupt(digitalPinToInterrupt(ENCOD1_PIN_L), Encod_ISR_L, RISING); // interrrupt 1 is data ready
@@ -234,7 +226,7 @@ void setup()
   IR_R_PID.Kd = 2.0;
 
   TURN_PID.Kp = 0.3; //5.0;
-  TURN_PID.Ki = 0.005; //0.1; 
+  TURN_PID.Ki = 0.005; //0.1;
   TURN_PID.Kd = 0.5; //0.2;
 
   robo.prev_Orien = robo.initial_Orien;
@@ -251,67 +243,67 @@ int i = 0;
 
 void loop()
 {
-  
-/* TESTING CODE 
- * Don't remove!!!!!!
- * - -----------------------------------------------------------------------------------------------
-  if ((millis() - waitTimer[0]) > 200)
-  {
-    //IR_Sensor();
 
-    //Forward(U_PID.pid);
-    //Leftward(E_L_PID.pid, E_R_PID.pid);
-    //Forward(E_L_PID.pid, E_R_PID.pid);
+  /* TESTING CODE
+     Don't remove!!!!!!
+     - -----------------------------------------------------------------------------------------------
+    if ((millis() - waitTimer[0]) > 200)
+    {
+      //IR_Sensor();
 
-
-
-      //Serial.print ("time in secs : "); //whl_L.curr_AngVel : ");
-      // Serial.print (millis()/1000.0); //whl_L.curr_AngVel); //robo.curr_LinVel);
-      // Serial.print ("\t");
-      //    Serial.print ("targetSpeed : "); //whl_L.curr_AngVel : ");
-      //    Serial.print (targetSpeed); //whl_L.curr_AngVel); //robo.curr_LinVel);
-      //    Serial.print ("\t");
-      //    Serial.print ("whl_L.curr_AngVel : "); //whl_L.curr_AngVel : ");
-      //    Serial.print (whl_L.curr_AngVel);
-      //    Serial.print ("\t");
-      //    Serial.print ("whl_R.curr_AngVel : "); //whl_L.curr_AngVel : ");
-      //    Serial.println (whl_R.curr_AngVel);
+      //Forward(U_PID.pid);
+      //Leftward(E_L_PID.pid, E_R_PID.pid);
+      //Forward(E_L_PID.pid, E_R_PID.pid);
 
 
-      waitTimer[0] = millis();
-    }
 
-    //  if (robo.curr_xPos > 200 - 0.7)
-    //  {
-    //    robo_Halt();
-    //    Serial.print("robo.curr_Orien : ");
-    //    Serial.println(rad2Deg(robo.curr_Orien));
-    //    while (1) {}
-    //  }
+        //Serial.print ("time in secs : "); //whl_L.curr_AngVel : ");
+        // Serial.print (millis()/1000.0); //whl_L.curr_AngVel); //robo.curr_LinVel);
+        // Serial.print ("\t");
+        //    Serial.print ("targetSpeed : "); //whl_L.curr_AngVel : ");
+        //    Serial.print (targetSpeed); //whl_L.curr_AngVel); //robo.curr_LinVel);
+        //    Serial.print ("\t");
+        //    Serial.print ("whl_L.curr_AngVel : "); //whl_L.curr_AngVel : ");
+        //    Serial.print (whl_L.curr_AngVel);
+        //    Serial.print ("\t");
+        //    Serial.print ("whl_R.curr_AngVel : "); //whl_L.curr_AngVel : ");
+        //    Serial.println (whl_R.curr_AngVel);
 
-    //   if (rad2Deg(robo.curr_Orien) > 80) //zrobo.curr_xPos > 400)//  //curr_Pos
-    //   {
-    //      waitInSecs(0.01);
-    //      Forward(E_L_PID.pid, E_R_PID.pid);
-    //      Serial.print("robo.curr_xPos : ");
-    //      Serial.print(robo.curr_xPos);
-    //      Serial.print("\t");
-    //      if (robo.curr_xPos > 50)
-    //     {
-    //       robo_Halt();
-    //      Serial.print("robo.curr_Orien : ");
-    //      Serial.println(rad2Deg(robo.curr_Orien));
-    //      while(1){}
-    //     }
-    //
-    //   }
-    - -----------------------------------------------------------------------------------------------
+
+        waitTimer[0] = millis();
+      }
+
+      //  if (robo.curr_xPos > 200 - 0.7)
+      //  {
+      //    robo_Halt();
+      //    Serial.print("robo.curr_Orien : ");
+      //    Serial.println(rad2Deg(robo.curr_Orien));
+      //    while (1) {}
+      //  }
+
+      //   if (rad2Deg(robo.curr_Orien) > 80) //zrobo.curr_xPos > 400)//  //curr_Pos
+      //   {
+      //      waitInSecs(0.01);
+      //      Forward(E_L_PID.pid, E_R_PID.pid);
+      //      Serial.print("robo.curr_xPos : ");
+      //      Serial.print(robo.curr_xPos);
+      //      Serial.print("\t");
+      //      if (robo.curr_xPos > 50)
+      //     {
+      //       robo_Halt();
+      //      Serial.print("robo.curr_Orien : ");
+      //      Serial.println(rad2Deg(robo.curr_Orien));
+      //      while(1){}
+      //     }
+      //
+      //   }
+      - -----------------------------------------------------------------------------------------------
   */
 
-  
+
   //IRtest();
-//  Serial.print("Counter: ");
-//  Serial.println(counter);
+  //  Serial.print("Counter: ");
+  //  Serial.println(counter);
   detour = true;
   if ((millis() - waitTimer[2]) > 50)
   {
@@ -397,15 +389,14 @@ void loop()
     {
       //Leftward(0);
       //TurnLeft_Ang(-90);
-      if(counter <= 1){
-      Turn_Ang(-90);
+      if (counter <= 1) {
+        //Turn_Ang(270);
+        //      Serial.print("Prev Angle : "); Serial.print("\t");Serial.println(rad2Deg(prev_Ang));
+        //      Serial.print("Curr Angle : "); Serial.print("\t");Serial.println(rad2Deg(robo.curr_Orien));
       }
       //Forward(E_L_PID.pid, E_R_PID.pid);
       //Serial.println("In Detour");
     }
-
-
-
 
     waitTimer[2] = millis();
   }
@@ -428,9 +419,10 @@ void loop()
     whl_L.curr_AngVel = whl_AngVel_L(delta_L);
     whl_R.curr_AngVel = whl_AngVel_R(delta_R);
 
-//Serial.print(whl_R.curr_AngVel);
-//Serial.print("\t");
-//Serial.println(whl_L.curr_AngVel);
+    //Serial.print(whl_R.curr_AngVel);
+    //Serial.print("\t");
+    //Serial.println(whl_L.curr_AngVel);
+    
     // Update change in wheel distances
     whl_L.del_Dist = whlDeltaD_L(delta_L);
     whl_R.del_Dist = whlDeltaD_R(delta_R);
@@ -460,17 +452,19 @@ void loop()
     E_R_PID.pid = (E_R_PID.Kp * E_R_PID.error) + (E_R_PID.Ki * E_R_PID.integral) + (E_R_PID.Kd * E_R_PID.derivative);
     E_R_PID.lastError = E_R_PID.error;
 
-//    if(turn == true)
-//    {
-      //TURN_PID.error = turnError()
-      //Serial.print("TURN_PID.pid: ");Serial.println(TURN_PID.pid);
+    //    if(turn == true)
+    //    {
+    //TURN_PID.error = turnError()
+    //Serial.print("TURN_PID.pid: ");Serial.println(TURN_PID.pid);
 
-      TURN_PID.integral = TURN_PID.integral + TURN_PID.error;
-      TURN_PID.derivative = TURN_PID.error - TURN_PID.lastError;
-      TURN_PID.pid = (TURN_PID.Kp * TURN_PID.error) + (TURN_PID.Ki * TURN_PID.integral) + (TURN_PID.Kd * TURN_PID.derivative);
-      TURN_PID.lastError = TURN_PID.error;
+    TURN_PID.integral = TURN_PID.integral + TURN_PID.error;
+    TURN_PID.derivative = TURN_PID.error - TURN_PID.lastError;
+    TURN_PID.pid = (TURN_PID.Kp * TURN_PID.error) + (TURN_PID.Ki * TURN_PID.integral) + (TURN_PID.Kd * TURN_PID.derivative);
+    TURN_PID.lastError = TURN_PID.error;
     //}
 
+    Distance_IRFront = IRFront();
+    Distance_IRServo = IRServo();
 
     // Update Delta Distance
     robo.del_Dist = roboDel_Dist();
@@ -486,9 +480,6 @@ void loop()
 
     // Update Robot Orientation
     robo.curr_Orien = roboAngle();
-
-//    Distance_IRFront = IR_Sensor(IR_Front_Reading);
-//    Distance_IRServo = IR_Sensor(IR_Servo_Reading);
 
     prevvy = robo.curr_Orien;
     //    Serial.print("robo.prev_Orien : "); //whl_L.curr_AngVel : ");
@@ -537,31 +528,6 @@ void Encod_ISR_R()
   }
   //   Serial.print("ECount_R : ");
   //   Serial.println(ECount_R);
-}
-
-//---------------- IR Average ----------------
-
-double IR_Average() {
-  float IRleftSum;
-  float IRrightSum;
-  float IRfrontSum;
-  float IRscanSum;
-  float IRleftAvg;
-  float IRrightAvg;
-  float IRfrontAvg;
-  float IRscanAvg;
-  for (int i = 1; i <= 15; i++) {
-    IRtest();
-    IRleftSum = IRleftSum + Distance_IRLeft;
-    IRrightSum = IRrightSum + Distance_IRRight;
-    IRfrontSum = IRfrontSum + Distance_IRFront;
-    IRscanSum = IRscanSum + Distance_IRServo;
-  }
-
-  IRleftAvg = IRleftSum / 15;
-  IRrightAvg = IRrightSum / 15;
-  IRfrontAvg = IRfrontSum / 15;
-  IRscanAvg = IRscanSum / 15;
 }
 
 // -------------------- Motion Control Functions --------------------
@@ -641,7 +607,7 @@ void Leftward(double pidResult)
   digitalWrite(IN1_PIN_L, HIGH);
   digitalWrite(IN2_PIN_L, LOW);
   analogWrite(EN_PIN_L, RpS2pwm_L(targetSpeed) - pidResult);
-Serial.println(RpS2pwm_L(targetSpeed));
+  Serial.println(RpS2pwm_L(targetSpeed));
   digitalWrite(IN3_PIN_R, LOW);
   digitalWrite(IN4_PIN_R, HIGH);
   analogWrite(EN_PIN_R, RpS2pwm_R(targetSpeed) - pidResult);
@@ -652,7 +618,7 @@ void Rightward(double pidResult)
   digitalWrite(IN1_PIN_L, LOW);
   digitalWrite(IN2_PIN_L, HIGH);
   analogWrite(EN_PIN_L, RpS2pwm_L(targetSpeed) + pidResult);
- 
+
   digitalWrite(IN3_PIN_R, HIGH);
   digitalWrite(IN4_PIN_R, LOW);
   analogWrite(EN_PIN_R, RpS2pwm_R(targetSpeed) + pidResult);
@@ -854,23 +820,23 @@ void TurnLeft_Ang(int8_t ang) { // Angle used to be -90 + 7
 }
 
 // Turn until Angle is reached
-void Turn_Ang(int8_t ang) { 
+void Turn_Ang(int ang) {
   double tempSpeed = targetSpeed;
   targetSpeed = 1.5;
   TURN_PID.error = turnError(ang);
-//  Serial.println("In TurnLeft");
-//  Serial.print("\t");
-  Serial.print("TURN_PID.Error: ");Serial.println(TURN_PID.error);
-  Serial.print("TURN_PID.Pid: ");Serial.println(TURN_PID.pid);
+  //  Serial.println("In TurnLeft");
+  //  Serial.print("\t");
+  Serial.print("TURN_PID.Error: "); Serial.println(TURN_PID.error);
+  Serial.print("TURN_PID.Pid: "); Serial.println(TURN_PID.pid);
 
   if (TURN_PID.error < -2)
   {
     Leftward(TURN_PID.pid);
     //Serial.println("ello");
-  }else if(TURN_PID.error > 2)
+  } else if (TURN_PID.error > 2)
   {
     Rightward(TURN_PID.pid);
-  }else
+  } else
   {
     robo_Halt();
     TURN_PID.error = 0.0;
@@ -891,131 +857,102 @@ void Turn_Ang(int8_t ang) {
 
 // Move Arm until Angle is reached
 
-void MoveArm_Ang(double ang){
-  Arm_Servo.write(ang);  
+void MoveArm_Ang(double ang) {
+  Arm_Servo.write(ang);
 }
 
-void MoveClaw_Ang(double ang){
-  Claw_Servo.write(ang);  
+void MoveClaw_Ang(double ang) {
+  Claw_Servo.write(ang);
 }
 
 // <--------------- End of High Level Manipulator Control ############
 
 //-------------------------IR Sensors-------------------------
-double IR_Sensor(int pin) {
-  double IR_Value = analogRead(pin); //take reading from sensor
-
-  float Raw_Voltage_IR = IR_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IR = -30.195 * Raw_Voltage_IR + 71.35;
-  return Distance_IR;
-}
 double IR_Servo_Scan() {
 
   for (pos = 0; pos <= 40; pos += 1) {          // goes from 0 degrees to 60 degrees
     IR_Servo.write(pos);                           // tell servo to go to position in variable 'pos'
     if (pos == 0 || pos == 10 || pos == 20 || pos == 30 || pos == 40) {
-      Distance_IRServo = IR_Sensor(IR_Servo_Reading);
+      float Dis_IRServo = IRServo();
       Serial.print("Servo IR Distance: ");
-      Serial.println(Distance_IRServo);
-      return Distance_IRServo;
+      Serial.println(Dis_IRServo);
+      return Dis_IRServo;
     }
-    //delay(15);                       // waits 15ms for the servo to reach the position
+    delay(15);                       // waits 15ms for the servo to reach the position
   }
 
   for (pos = 40; pos >= 0; pos -= 1) {                      // goes from 60 degrees to 0 degrees
     IR_Servo.write(pos);                                     // tell servo to go to position in variable 'pos'
     if (pos == 0 || pos == 10 || pos == 20 || pos == 30 || pos == 40) {
-      Distance_IRServo = IR_Sensor(IR_Servo_Reading);
+      float Dis_IRServo = IRServo();
       Serial.print("Servo IR Distance: ");
-      Serial.println(Distance_IRServo);
-      return Distance_IRServo;
+      Serial.println(Dis_IRServo);
+      return Dis_IRServo;
     }
-    //delay(15);                       // waits 15ms for the servo to reach the position
+    delay(15);                       // waits 15ms for the servo to reach the position
   }
 }
 
-void IRtest() {
-  double IR_Servo_Value;
-  double IR_Left_Value;
+float IRFront() {
   double IR_Front_Value;
-  double IR_Right_Value;
-  IR_Servo.write(20);                           // tell servo to go to position in variable 'pos'
-
-  IR_Servo_Value = analogRead(IR_Servo_Reading); //take reading from sensor
-  IR_Left_Value = analogRead(IR_Left_Reading); //take reading from sensor
-  IR_Front_Value = analogRead(IR_Front_Reading); //take reading from sensor
-  IR_Right_Value = analogRead(IR_Right_Reading); //take reading from sensor
-
-  float Raw_Voltage_IRServo = IR_Servo_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IRServo = -30.195 * Raw_Voltage_IRServo + 71.35;
-  float Raw_Voltage_IRLeft = IR_Left_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IRLeft = -30.195 * Raw_Voltage_IRLeft + 71.35;
-  float Raw_Voltage_IRFront = IR_Front_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IRFront = -30.195 * Raw_Voltage_IRFront + 71.35;
-  float Raw_Voltage_IRRight = IR_Right_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IRRight = -30.195 * Raw_Voltage_IRRight + 71.35;
-  //  Serial.print("Servo IR Distance: ");
-  //  Serial.println(Distance_IRServo);
-  //  Serial.print("Left IR Distance: ");
-  //  Serial.println(Distance_IRLeft);
-  //  Serial.print("Front IR Distance: ");
-  //  Serial.println(Distance_IRFront);
-  //  Serial.print("Right IR Distance: ");
-  //  Serial.println(Distance_IRRight);
-
-  //delay(100); //create a delay of 0.1s
-}
-
-void IRFront() {
-  double IR_Front_Value;
- 
+  analogReadResolution(10);
+  analogReadAveraging(100);
   IR_Front_Value = analogRead(IR_Front_Reading); //take reading from sensor
 
-
   float Raw_Voltage_IRFront = IR_Front_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IRFront = -29.642 * Raw_Voltage_IRFront + 69.236;
+  float Dis_IRFront = -29.642 * Raw_Voltage_IRFront + 69.236;
 
-    Serial.print("Front IR Distance: ");
-    Serial.println(Distance_IRFront);
+  Serial.print("Front IR Distance: ");
+  Serial.println(Distance_IRFront);
+
+  return Dis_IRFront;
 }
 
-void IRRight() {
-  
-  double IR_Right_Value;
+float IRRight() {
 
+  double IR_Right_Value;
+  analogReadResolution(10);
+  analogReadAveraging(100);
   IR_Right_Value = analogRead(IR_Right_Reading); //take reading from sensor
 
   float Raw_Voltage_IRRight = IR_Right_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IRRight = -29.642 * Raw_Voltage_IRRight + 69.236;
+  float Dis_IRRight = -29.642 * Raw_Voltage_IRRight + 69.236;
 
   Serial.print("Right IR Distance: ");
-  Serial.println(Distance_IRRight);
+  Serial.println(Dis_IRRight);
+  return Dis_IRRight;
 }
 
-void IRLeft() {
-  
-  double IR_Left_Value;
+float IRLeft() {
 
+  double IR_Left_Value;
+  analogReadResolution(10);
+  analogReadAveraging(100);
   IR_Left_Value = analogRead(IR_Left_Reading); //take reading from sensor
 
   float Raw_Voltage_IRLeft = IR_Left_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IRLeft = -29.642 * Raw_Voltage_IRLeft + 69.236;
+  float Dis_IRLeft = -29.642 * Raw_Voltage_IRLeft + 69.236;
 
-    Serial.print("Left IR Distance: ");
-    Serial.println(Distance_IRLeft);
+  Serial.print("Left IR Distance: ");
+  Serial.println(Dis_IRLeft);
+
+  return Dis_IRLeft;
 }
 
-void IRServo() {
-  
-  double IR_Servo_Value;
+float IRServo() {
 
+  double IR_Servo_Value;
+  analogReadResolution(10);
+  analogReadAveraging(100);
   IR_Servo_Value = analogRead(IR_Servo_Reading); //take reading from sensor
 
   float Raw_Voltage_IRServo = IR_Servo_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Distance_IRServo = -29.642 * Raw_Voltage_IRServo + 69.236;
+  float Dis_IRServo = -29.642 * Raw_Voltage_IRServo + 69.236;
 
-    Serial.print("Servo IR Distance: ");
-    Serial.println(Distance_IRServo);
+  Serial.print("Servo IR Distance: ");
+  Serial.println(Dis_IRServo);
+  return Dis_IRServo;
+  
 }
 // -------------------- Robot Localization Functions --------------------
 
@@ -1030,19 +967,17 @@ double encodError(double setVal, Wheel W) {
 double IR_L_Error() {
   float distanceGood_L = 0.0;
 
-  IR_Average();
-  float IR_Val_L;
-  IR_Val_L = IRleftAvg;
-  //delay(10);
-  if (IR_Val_L < MAX_DISTANCE && IR_Val_L > MIN_DISTANCE) {
-    distanceGood_L = IR_Val_L;
+  Distance_IRLeft = IRLeft();
+
+  if (Distance_IRLeft < MAX_DISTANCE && Distance_IRLeft > MIN_DISTANCE) {
+    distanceGood_L = Distance_IRLeft;
   }
-  else if (IR_Val_L > MAX_DISTANCE) {
+  else if (Distance_IRLeft > MAX_DISTANCE) {
     distanceGood_L = MAX_DISTANCE;
-    IR_Val_L = MAX_DISTANCE;
+    Distance_IRLeft = MAX_DISTANCE;
   }
   else {
-    IR_Val_L = MAX_DISTANCE;
+    Distance_IRLeft = MAX_DISTANCE;
     distanceGood_L = MAX_DISTANCE;
   }
   //  Serial.print("distanceGood_L: ");
@@ -1056,19 +991,17 @@ double IR_L_Error() {
 double IR_R_Error() {
   float distanceGood_R = 0.0;
 
-  IR_Average();
-  float IR_Val_R;
-  IR_Val_R = IRrightAvg;
-  //delay(10);
-  if (IR_Val_R < MAX_DISTANCE && IR_Val_R > MIN_DISTANCE) {
-    distanceGood_R = IR_Val_R;
+  Distance_IRRight = IRRight();
+
+  if (Distance_IRRight < MAX_DISTANCE && Distance_IRRight > MIN_DISTANCE) {
+    distanceGood_R = Distance_IRRight;
   }
-  else if (IR_Val_R > MAX_DISTANCE) {
+  else if (Distance_IRRight > MAX_DISTANCE) {
     distanceGood_R = MAX_DISTANCE;
-    IR_Val_R = MAX_DISTANCE;
+    Distance_IRRight = MAX_DISTANCE;
   }
   else {
-    IR_Val_R = MAX_DISTANCE;
+    Distance_IRRight = MAX_DISTANCE;
     distanceGood_R = MAX_DISTANCE;
   }
   //  Serial.print("distanceGood_L: ");
