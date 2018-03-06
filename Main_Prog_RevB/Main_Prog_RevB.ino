@@ -217,7 +217,7 @@ void setup()
   E_R_PID.Ki = 0.1; //0.1;
   E_R_PID.Kd = 0.3; //0.3;
 
-  IR_L_PID.Kp = 2.0; //5.0;
+  IR_L_PID.Kp = 5.0; //5.0;
   IR_L_PID.Ki = 0.0; //0.3;
   IR_L_PID.Kd = 2.0;
 
@@ -394,6 +394,7 @@ void loop()
         //      Serial.print("Prev Angle : "); Serial.print("\t");Serial.println(rad2Deg(prev_Ang));
         //      Serial.print("Curr Angle : "); Serial.print("\t");Serial.println(rad2Deg(robo.curr_Orien));
       }
+      Forward(-IR_L_PID.pid);
       //Forward(E_L_PID.pid, E_R_PID.pid);
       //Serial.println("In Detour");
     }
@@ -537,7 +538,7 @@ void Forward(double pidResult)
 {
   digitalWrite(IN1_PIN_L, LOW);
   digitalWrite(IN2_PIN_L, HIGH);
-  analogWrite(EN_PIN_L, (RpS2pwm_L(targetSpeed) + pidResult - 9)); //-13
+  analogWrite(EN_PIN_L, (RpS2pwm_L(targetSpeed) + (pidResult + 30))); //-13
 
   digitalWrite(IN3_PIN_R, LOW);
   digitalWrite(IN4_PIN_R, HIGH);
@@ -900,7 +901,7 @@ float IRFront() {
   IR_Front_Value = analogRead(IR_Front_Reading); //take reading from sensor
 
   float Raw_Voltage_IRFront = IR_Front_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Dis_IRFront = -29.642 * Raw_Voltage_IRFront + 69.236;
+  float Dis_IRFront = -29.642 * Raw_Voltage_IRFront + 71.236;
 
   Serial.print("Front IR Distance: ");
   Serial.println(Distance_IRFront);
