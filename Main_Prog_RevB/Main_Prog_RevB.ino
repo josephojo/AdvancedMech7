@@ -162,8 +162,8 @@ const double wall_Length = 17.8; // distance from pillar to pillar in cms
 uint8_t counter = 1;
 bool detour = false;
 bool turn = false;
-float targetDist_Side = 11.0;
-float targetDist_Front = 8.0;
+float targetDist_Side = 11.15;
+float targetDist_Front = 5.0; //8.0
 double prev_Dist = 0.0 ;
 double prev_Ang = 0.0;
 
@@ -300,9 +300,6 @@ void loop()
       //   }
       - -----------------------------------------------------------------------------------------------
   */
-
-
-  //IRtest();
   //  Serial.print("Counter: ");
   //  Serial.println(counter);
   detour = true;
@@ -395,7 +392,7 @@ void loop()
         //      Serial.print("Prev Angle : "); Serial.print("\t");Serial.println(rad2Deg(prev_Ang));
         //      Serial.print("Curr Angle : "); Serial.print("\t");Serial.println(rad2Deg(robo.curr_Orien));
       }
-      Forward(-IR_L_PID.pid);
+      //Forward(-IR_L_PID.pid);
       //Forward(IR_R_PID.pid);
       //Forward(E_L_PID.pid, E_R_PID.pid);
       //Serial.println("In Detour");
@@ -911,8 +908,8 @@ float IRFront() {
   float Raw_Voltage_IRFront = IR_Front_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
   float Dis_IRFront = -29.642 * Raw_Voltage_IRFront + 71.236;
 
-//  Serial.print("Front IR Distance: ");
-//  Serial.println(Distance_IRFront);
+  Serial.print("Front IR Distance: ");
+  Serial.println(Distance_IRFront);
 
   return Dis_IRFront;
 }
