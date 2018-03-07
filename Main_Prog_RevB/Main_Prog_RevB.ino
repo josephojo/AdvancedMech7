@@ -38,9 +38,9 @@
 #define IR_Right_Reading 39    //IR Right reading
 
 
-#define MAX_DISTANCE 50.0
+#define MAX_DISTANCE 20.0
 #define MIN_DISTANCE 2.0
-#define NUM_CONDITIONS 21
+#define NUM_CONDITIONS 37
 
 
 // -------------------- Variable Definitions --------------------
@@ -162,7 +162,7 @@ const double wall_Length = 17.8; // distance from pillar to pillar in cms
 uint8_t counter = 1;
 bool detour = false;
 bool turn = false;
-float targetDist_Side = 11.15;
+float targetDist_Side = 11.0; //11.15;
 float targetDist_Front = 5.0; //8.0
 double prev_Dist = 0.0 ;
 double prev_Ang = 0.0;
@@ -171,43 +171,44 @@ double prevvy = 0.0;
 
 int caseStep [][NUM_CONDITIONS] = 
 {
-{0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,80,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,80,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,80,0,0,0,0,0,0,0,0,0,0},
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,1,0,0,0,80,0,0,0,0,0,0,0,0,0,0},
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0 },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,1,0,0,0,0,80,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0 }
+{0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0  },
+{1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0  },
+{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,0,1,0,0,0,0,0,0,97,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0  },
+{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,150,0,0,0,0,0,0,0,0,0,0},
+{1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0  },
+{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,0,1,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
+{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0  },
+{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
+{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0  }
 };
 
 // ************************* End of Definitions *********************************
@@ -336,11 +337,12 @@ void loop()
       //   }
       - -----------------------------------------------------------------------------------------------
   */
-  //  Serial.print("Counter: ");
-  //  Serial.println(counter);
-  detour = false;
+   
+  //detour = true;
   if ((millis() - waitTimer[2]) > 50)
-  {
+  { 
+    Serial.print("Counter: ");
+    Serial.println(counter);
     if (detour == false && counter < NUM_CONDITIONS)
     {
       // --------- Robot Movement --------
@@ -375,13 +377,13 @@ void loop()
       }
       else if (caseStep[counter][2] == 1) // If asked to Turn right
       {
-        //TurnRight_Ang(caseStep[counter][10]);
-        Turn_Ang(caseStep[counter][10]);
+        TurnRight_Ang(caseStep[counter][10]);
+        //Turn_Ang(caseStep[counter][10]);
       }
       else if (caseStep[counter][3] == 1) // If asked to Turn Left
       {
-        //TurnLeft_Ang(caseStep[counter][10]);
-        Turn_Ang(-caseStep[counter][10]);
+        TurnLeft_Ang(-caseStep[counter][10]);
+        //Turn_Ang(-caseStep[counter][10]);
       }
       else {
         caseStep[counter][19] = 1;
@@ -430,7 +432,9 @@ void loop()
       }
       //Forward(-IR_L_PID.pid);
       //Forward(IR_R_PID.pid);
-      Forward(E_L_PID.pid, E_R_PID.pid);
+      //Rightward(E_L_PID.pid, E_R_PID.pid);
+      Leftward(E_L_PID.pid, E_R_PID.pid);
+      //Forward(E_L_PID.pid, E_R_PID.pid);
       //Serial.println("In Detour");
     }
 
@@ -438,7 +442,7 @@ void loop()
   }
 
   // Updates all variables for calculations every 50 ms
-  if ((millis() - waitTimer[1]) > 50)
+  if ((millis() - waitTimer[1]) > 25)
   {
     cli();
     long EL = ECount_L;
@@ -455,12 +459,12 @@ void loop()
     whl_L.curr_AngVel = whl_AngVel_L(delta_L);
     whl_R.curr_AngVel = whl_AngVel_R(delta_R);
 
-    Serial.print(whl_R.curr_AngVel);
-    Serial.print("\t");
-    Serial.print(whl_L.curr_AngVel);
-    Serial.print("\t");
-    Serial.print("Distance_IRL: ");
-  Serial.print(Distance_IRLeft);
+//    Serial.print(whl_R.curr_AngVel);
+//    Serial.print("\t");
+//    Serial.print(whl_L.curr_AngVel);
+//    Serial.print("\t");
+//    Serial.print("Distance_IRL: ");
+//  Serial.print(Distance_IRLeft);
     
     // Update change in wheel distances
     whl_L.del_Dist = whlDeltaD_L(delta_L);
@@ -468,9 +472,9 @@ void loop()
 
     // Calculate the PID
     IR_L_PID.error = IR_L_Error();
-    Serial.print("\t");
-    Serial.print("IR_L_PID.error: ");
-  Serial.println(IR_L_PID.error);
+//    Serial.print("\t");
+//    Serial.print("IR_L_PID.error: ");
+//  Serial.println(IR_L_PID.error);
     IR_L_PID.integral = IR_L_PID.integral + IR_L_PID.error;
     IR_L_PID.derivative = IR_L_PID.error - IR_L_PID.lastError;
     IR_L_PID.pid = (IR_L_PID.Kp * IR_L_PID.error) + (IR_L_PID.Ki * IR_L_PID.integral) + (IR_L_PID.Kd * IR_L_PID.derivative);
@@ -838,9 +842,9 @@ void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doub
 }
 
 // Turn Right until Angle is reached
-void TurnRight_Ang(int8_t ang) { // Angle used to be 90 - 10
+void TurnRight_Ang(int ang) { // Angle used to be 90 - 10
   Rightward(E_L_PID.pid, E_R_PID.pid);
-  if (rad2Deg(robo.curr_Orien - prev_Ang) > ang)
+  if (rad2Deg(robo.curr_Orien - prev_Ang) > ang - 10)
   {
     robo_Halt();
     prev_Dist = robo.curr_Pos;
@@ -850,9 +854,10 @@ void TurnRight_Ang(int8_t ang) { // Angle used to be 90 - 10
 }
 
 // Turn Left until Angle is reached
-void TurnLeft_Ang(int8_t ang) { // Angle used to be -90 + 7
+void TurnLeft_Ang(int ang) { // Angle used to be -90 + 7
   Leftward(E_L_PID.pid, E_R_PID.pid);
-  if (rad2Deg(robo.curr_Orien - prev_Ang) < ang)
+  Serial.println("LEFT");
+  if (rad2Deg(robo.curr_Orien - prev_Ang) < ang + 12)
   {
     robo_Halt();
     prev_Dist = robo.curr_Pos;
@@ -864,7 +869,7 @@ void TurnLeft_Ang(int8_t ang) { // Angle used to be -90 + 7
 // Turn until Angle is reached
 void Turn_Ang(int ang) {
   double tempSpeed = targetSpeed;
-  targetSpeed = 1.5;
+  targetSpeed = 1.0;
   TURN_PID.error = turnError(ang);
   //  Serial.println("In TurnLeft");
   //  Serial.print("\t");
@@ -975,8 +980,8 @@ float IRLeft() {
   float Raw_Voltage_IRLeft = IR_Left_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
   float Dis_IRLeft = -29.642 * Raw_Voltage_IRLeft + 71.236;
 
-//  Serial.print("Left IR Distance: ");
-//  Serial.println(Dis_IRLeft);
+  Serial.print("Left IR Distance: ");
+  Serial.println(Dis_IRLeft);
 
   return Dis_IRLeft;
 }
