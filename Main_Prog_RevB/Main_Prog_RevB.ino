@@ -904,13 +904,28 @@ void Turn_Ang(int ang) {
 
 // Move Arm until Angle is reached
 
-void MoveArm_Ang(double ang) {
-  Arm_Servo.write(ang);
+void Secure_The_Bag() {
+  Arm_Servo.write(0);
+  delay(500);
+  Arm_Servo.write(75);
+  delay(500);
+  Arm_Servo.write(0);
+}
+void Shake_The_Bag() {
+  Arm_Servo.write(0);
+  delay(50);
+  Arm_Servo.write(75);
+  delay(50);
+  Arm_Servo.write(0);
 }
 
-void MoveClaw_Ang(double ang) {
-  Claw_Servo.write(ang);
-}
+//void MoveArm_Ang(double ang) {
+//  Arm_Servo.write(ang);
+//}
+//
+//void MoveClaw_Ang(double ang) {
+//  Claw_Servo.write(ang);
+//}
 
 // <--------------- End of High Level Manipulator Control ############
 
