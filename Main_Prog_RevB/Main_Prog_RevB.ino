@@ -957,6 +957,13 @@ void MoveClaw_Ang(int ang) {
   Claw_Servo.write(ang);
   delay(500);
 }
+void Shake_The_Bag() {
+  Arm_Servo.write(0);
+  delay(50);
+  Arm_Servo.write(75);
+  delay(50);
+  Arm_Servo.write(0);
+}
 
 // <--------------- End of High Level Manipulator Control ############
 
