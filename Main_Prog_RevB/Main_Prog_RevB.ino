@@ -40,7 +40,7 @@
 
 #define MAX_DISTANCE 20.0
 #define MIN_DISTANCE 2.0
-#define NUM_CONDITIONS 37
+#define NUM_CONDITIONS 81
 
 
 // -------------------- Variable Definitions --------------------
