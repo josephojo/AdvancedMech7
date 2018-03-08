@@ -130,11 +130,6 @@ Servo Arm_Servo;
 Servo Claw_Servo;
 int pos = 0;                            // variable to store the servo position
 
-float Distance_IRServo = 0.0;
-float Distance_IRLeft = 0.0;
-float Distance_IRFront = 0.0;
-float Distance_IRRight = 0.0;
-
 // #################### PID ####################
 struct PID {
   double Ki;
@@ -167,6 +162,12 @@ float targetDist_Front = 5.0; //8.0
 double prev_Dist = 0.0 ;
 double prev_Ang = 0.0;
 double tempSpeed = 0.0;
+float Distance_IRServo = 0.0;
+float Distance_IRLeft = 0.0; //Used for the capped (MIN_DISTANCE & MAX_DISTANCE) values for the left IR sensor
+float Distance_IRFront = 0.0;
+float Distance_IRRight = 0.0; //Used for the capped (MIN_DISTANCE & MAX_DISTANCE) values for the right IR sensor
+float Dis_IRLeft = 0.0; //Used for the raw/uncapped values for the left IR sensor
+float Dis_IRRight = 0.0; //Used for the raw/uncapped values for the right IR sensor
 
 double prevvy = 0.0;
 
@@ -317,7 +318,7 @@ void setup()
   robo.prev_yPos = robo.initial_yPos;
 
   delay(5000);
-  counter = 36;
+  counter = 18;
   tempSpeed = targetSpeed;
 
   start_Time = millis() / 1000;
@@ -389,8 +390,17 @@ void loop()
   { 
 //    Serial.print("Counter: ");
 //    Serial.println(counter);
-//    Serial.print("Left Distance: ");
-//    Serial.println(Distance_IRLeft);
+    Serial.print("Raw Left Distance: ");
+    Serial.print(Dis_IRLeft);
+    Serial.print("\t");
+    Serial.print("Left Distance: ");
+    Serial.print(Distance_IRLeft);
+    Serial.print("\t");
+    Serial.print("Raw Right Distance: ");
+    Serial.print(Dis_IRRight);
+    Serial.print("\t");
+    Serial.print("Right Distance: ");
+    Serial.println(Distance_IRRight);
     if (detour == false && counter < NUM_CONDITIONS)
     {
       // --------- Robot Movement --------
@@ -517,10 +527,10 @@ void loop()
     // Get the current speed of the motors
     whl_L.curr_AngVel = whl_AngVel_L(delta_L);
     whl_R.curr_AngVel = whl_AngVel_R(delta_R);
-
-    Serial.print(whl_R.curr_AngVel);
-    Serial.print("\t");
-    Serial.println(whl_L.curr_AngVel);
+//
+//    Serial.print(whl_R.curr_AngVel);
+//    Serial.print("\t");
+//    Serial.println(whl_L.curr_AngVel);
 //    Serial.print("\t");
 //    Serial.print("Distance_IRL: ");
 //  Serial.print(Distance_IRLeft);
@@ -529,9 +539,13 @@ void loop()
     whl_L.del_Dist = whlDeltaD_L(delta_L);
     whl_R.del_Dist = whlDeltaD_R(delta_R);
 
+    // Gets Capped values of IR Sensors
+    Distance_IRLeft = IRLeft(); 
+    Distance_IRRight = IRRight();
+
     // Calculate the PID
     if(caseStep[counter][5] == 1)
-    IR_L_PID.error = IR_L_Error();
+    IR_L_PID.error = IR_L_Error(Distance_IRLeft);
 //    Serial.print("\t");
 //    Serial.print("IR_L_PID.error: ");
 //  Serial.println(IR_L_PID.error);
@@ -541,7 +555,7 @@ void loop()
     IR_L_PID.lastError = IR_L_PID.error;
 
     if(caseStep[counter][6] == 1)
-    IR_R_PID.error = IR_R_Error();
+    IR_R_PID.error = IR_R_Error(Distance_IRRight);
     IR_R_PID.integral = IR_R_PID.integral + IR_R_PID.error;
     IR_R_PID.derivative = IR_R_PID.error - IR_R_PID.lastError;
     IR_R_PID.pid = (IR_R_PID.Kp * IR_R_PID.error) + (IR_R_PID.Ki * IR_R_PID.integral) + (IR_R_PID.Kd * IR_R_PID.derivative);
@@ -829,7 +843,7 @@ void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
 void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
   if (PID_L_IR == 1) {
     Forward(-IR_L_PID.pid);
-    if (Distance_IRLeft >= MAX_DISTANCE)
+    if (Dis_IRLeft >= Distance_IRLeft)
     {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
@@ -841,7 +855,7 @@ void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
     }
   } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
-    if (Distance_IRLeft >= MAX_DISTANCE)
+    if (Dis_IRLeft >= Distance_IRLeft)
     {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
@@ -853,7 +867,7 @@ void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
     }
   } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
-    if (Distance_IRLeft >= MAX_DISTANCE)
+    if (Dis_IRLeft >= Distance_IRLeft)
     {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
@@ -867,7 +881,7 @@ void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
 void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
   if (PID_L_IR == 1) {
     Forward(-IR_L_PID.pid);
-    if (Distance_IRRight >= 20.0)
+    if (Dis_IRRight >= Distance_IRRight)
     {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
@@ -879,7 +893,7 @@ void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
     }
   } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
-    if (Distance_IRRight >= 20.0)
+    if (Dis_IRRight >= Distance_IRRight)
     {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
@@ -891,7 +905,7 @@ void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
     }
   } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
-    if (Distance_IRRight >= 20.0)
+    if (Dis_IRRight >= Distance_IRRight)
     {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
@@ -1081,11 +1095,22 @@ float IRRight() {
   IR_Right_Value = analogRead(IR_Right_Reading); //take reading from sensor
 
   float Raw_Voltage_IRRight = IR_Right_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Dis_IRRight = -29.642 * Raw_Voltage_IRRight + 69.236;
+  Dis_IRRight = -29.642 * Raw_Voltage_IRRight + 69.236;
 
 //  Serial.print("Right IR Distance: ");
 //  Serial.println(Dis_IRRight);
-  return Dis_IRRight;
+  float distanceGood_R = 0.0;
+
+  if (Dis_IRRight < MAX_DISTANCE && Dis_IRRight > MIN_DISTANCE) {
+    distanceGood_R = Dis_IRRight;
+  }
+  else if (Dis_IRRight > MAX_DISTANCE) {
+    distanceGood_R = MAX_DISTANCE;
+  }
+  else {
+    distanceGood_R = MAX_DISTANCE;
+  }
+  return distanceGood_R;
 }
 
 float IRLeft() {
@@ -1096,12 +1121,24 @@ float IRLeft() {
   IR_Left_Value = analogRead(IR_Left_Reading); //take reading from sensor
 
   float Raw_Voltage_IRLeft = IR_Left_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Dis_IRLeft = -29.642 * Raw_Voltage_IRLeft + 71.236;
+  Dis_IRLeft = -29.642 * Raw_Voltage_IRLeft + 71.236;
 
 //  Serial.print("Left IR Distance: ");
 //  Serial.println(Dis_IRLeft);
 
-  return Dis_IRLeft;
+  float distanceGood_L = 0.0;
+
+  if (Dis_IRLeft < MAX_DISTANCE && Dis_IRLeft > MIN_DISTANCE) {
+    distanceGood_L = Dis_IRLeft;
+  }
+  else if (Dis_IRLeft > MAX_DISTANCE) {
+    distanceGood_L = MAX_DISTANCE;
+  }
+  else {
+    distanceGood_L = MIN_DISTANCE;
+  }
+
+  return distanceGood_L;
 }
 
 float IRServo() {
@@ -1129,50 +1166,14 @@ double encodError(double setVal, Wheel W) {
 }
 
 // Solves for the difference between the left IR sensor and 8cm from left wall
-double IR_L_Error() {
-  float distanceGood_L = 0.0;
-
-  Distance_IRLeft = IRLeft();
-
-  if (Distance_IRLeft < MAX_DISTANCE && Distance_IRLeft > MIN_DISTANCE) {
-    distanceGood_L = Distance_IRLeft;
-  }
-  else if (Distance_IRLeft > MAX_DISTANCE) {
-    distanceGood_L = MAX_DISTANCE;
-    Distance_IRLeft = MAX_DISTANCE;
-  }
-  else {
-    Distance_IRLeft = MIN_DISTANCE;
-    distanceGood_L = MIN_DISTANCE;
-  }
-  //  Serial.print("distanceGood_L: ");
-  //  Serial.print(distanceGood_L);
-  //  Serial.print("\t");
-  return distanceGood_L - (targetDist_Side); // + 6
+double IR_L_Error(float dis) {
+  return dis - (targetDist_Side); // + 6
 }
 
 
 // Solves for the difference between the right IR sensor and 8cm from right wall
-double IR_R_Error() {
-  float distanceGood_R = 0.0;
-
-  Distance_IRRight = IRRight();
-
-  if (Distance_IRRight < MAX_DISTANCE && Distance_IRRight > MIN_DISTANCE) {
-    distanceGood_R = Distance_IRRight;
-  }
-  else if (Distance_IRRight > MAX_DISTANCE) {
-    distanceGood_R = MAX_DISTANCE;
-    Distance_IRRight = MAX_DISTANCE;
-  }
-  else {
-    Distance_IRRight = MAX_DISTANCE;
-    distanceGood_R = MAX_DISTANCE;
-  }
-  //  Serial.print("distanceGood_L: ");
-  //  Serial.print(distanceGood_L);
-  //  Serial.print("\t");
-  return distanceGood_R - targetDist_Side;
+double IR_R_Error(float dis) {
+  return dis - targetDist_Side;
 }
 
 // Solves for the difference in the angle of the robot compared to a set value (in deg)
