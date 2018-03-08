@@ -318,7 +318,7 @@ void setup()
   robo.prev_yPos = robo.initial_yPos;
 
   delay(5000);
-  counter = 18;
+  //counter = 18;
   tempSpeed = targetSpeed;
 
   start_Time = millis() / 1000;
