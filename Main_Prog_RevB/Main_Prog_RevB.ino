@@ -157,7 +157,7 @@ PID TURN_PID;
 const double pi = 3.14159265359;
 double waitTimer[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 uint8_t targetPWM = 70; // Baseline pwm for main motors
-double targetSpeed = 2.1; // 1.7; // Baseline rotational speed for main motors (in rad/sec)
+double targetSpeed = 1.7; // 1.7; // Baseline rotational speed for main motors (in rad/sec)
 const double wall_Length = 17.8; // distance from pillar to pillar in cms
 uint8_t counter = 1;
 bool detour = false;
@@ -166,6 +166,7 @@ float targetDist_Side = 11.0; //11.15;
 float targetDist_Front = 5.0; //8.0
 double prev_Dist = 0.0 ;
 double prev_Ang = 0.0;
+double tempSpeed = 0.0;
 
 double prevvy = 0.0;
 
@@ -210,10 +211,10 @@ int caseStep [][NUM_CONDITIONS] =
 {1,0,0,0,1,0,0,0,0,180,0,0,0,0,0,0,0,0,0,0},
 {0,0,0,1,0,0,0,0,0,0,98,0,0,0,0,0,0,0,0,0 },
 {1,0,0,0,1,0,0,0,0,150,0,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,1,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
+{1,0,0,0,0,0,1,0,0,120,0,0,0,0,0,0,0,0,0,0},
 {0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,70,0,0,0 },
 {0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0  },
-{0,1,0,0,1,0,0,0,0,230,0,0,0,0,0,0,0,0,0,0},
+{0,1,0,0,1,0,0,0,0,270,0,0,0,0,0,0,0,0,0,0},
 {0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
 {1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
 {0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
@@ -299,13 +300,13 @@ void setup()
   E_R_PID.Ki = 0.1; //0.1;
   E_R_PID.Kd = 0.3; //0.3;
 
-  IR_L_PID.Kp = 12.0; //15.0;
-  IR_L_PID.Ki = 0.000005; //0.3;
-  IR_L_PID.Kd = 5.0;
+  IR_L_PID.Kp = 15.0; 
+  IR_L_PID.Ki = 0.000005;
+  IR_L_PID.Kd = 3.0; //5.0;
 
-  IR_R_PID.Kp = 12.0; //15.0;
+  IR_R_PID.Kp = 15.0; //15.0;
   IR_R_PID.Ki = 0.000005; //0.3;
-  IR_R_PID.Kd = 5.0;
+  IR_R_PID.Kd = 3.0;
 
   TURN_PID.Kp = 0.3; //5.0;
   TURN_PID.Ki = 0.005; //0.1;
@@ -316,7 +317,8 @@ void setup()
   robo.prev_yPos = robo.initial_yPos;
 
   delay(5000);
-  counter = 18;
+  counter = 36;
+  tempSpeed = targetSpeed;
 
   start_Time = millis() / 1000;
 }
@@ -383,12 +385,12 @@ void loop()
   */
    
   //detour = true;
-  if ((millis() - waitTimer[2]) > 100)
+  if ((millis() - waitTimer[2]) > 50)
   { 
-    Serial.print("Counter: ");
-    Serial.println(counter);
-    Serial.print("Left Distance: ");
-    Serial.println(Distance_IRLeft);
+//    Serial.print("Counter: ");
+//    Serial.println(counter);
+//    Serial.print("Left Distance: ");
+//    Serial.println(Distance_IRLeft);
     if (detour == false && counter < NUM_CONDITIONS)
     {
       // --------- Robot Movement --------
@@ -476,6 +478,12 @@ void loop()
         //Turn_Ang(270);
         //      Serial.print("Prev Angle : "); Serial.print("\t");Serial.println(rad2Deg(prev_Ang));
         //      Serial.print("Curr Angle : "); Serial.print("\t");Serial.println(rad2Deg(robo.curr_Orien));
+        MoveArm_Ang(70);
+      delay(100);
+
+      MoveArm_Ang(0);
+      //delay(1000);
+      counter++;
       }
       //Forward(-IR_L_PID.pid);
       //Forward(IR_R_PID.pid);
@@ -483,13 +491,9 @@ void loop()
       //Leftward(E_L_PID.pid, E_R_PID.pid);
       //Forward(E_L_PID.pid, E_R_PID.pid);
       //Serial.println("In Detour");
-      //MoveArm_Ang(70);
-//      delay(1000);
-//
-//      MoveArm_Ang(0);
-//      delay(1000);
+      GoBackward_Dist(0, 0, 1, 300);
       //Backward(E_L_PID.pid, E_R_PID.pid);
-      GoBackward_Dist(1, 0, 0, 100);
+      
 
     }
 
@@ -514,9 +518,9 @@ void loop()
     whl_L.curr_AngVel = whl_AngVel_L(delta_L);
     whl_R.curr_AngVel = whl_AngVel_R(delta_R);
 
-//    Serial.print(whl_R.curr_AngVel);
-//    Serial.print("\t");
-//    Serial.print(whl_L.curr_AngVel);
+    Serial.print(whl_R.curr_AngVel);
+    Serial.print("\t");
+    Serial.println(whl_L.curr_AngVel);
 //    Serial.print("\t");
 //    Serial.print("Distance_IRL: ");
 //  Serial.print(Distance_IRLeft);
@@ -526,6 +530,7 @@ void loop()
     whl_R.del_Dist = whlDeltaD_R(delta_R);
 
     // Calculate the PID
+    if(caseStep[counter][5] == 1)
     IR_L_PID.error = IR_L_Error();
 //    Serial.print("\t");
 //    Serial.print("IR_L_PID.error: ");
@@ -535,6 +540,7 @@ void loop()
     IR_L_PID.pid = (IR_L_PID.Kp * IR_L_PID.error) + (IR_L_PID.Ki * IR_L_PID.integral) + (IR_L_PID.Kd * IR_L_PID.derivative);
     IR_L_PID.lastError = IR_L_PID.error;
 
+    if(caseStep[counter][6] == 1)
     IR_R_PID.error = IR_R_Error();
     IR_R_PID.integral = IR_R_PID.integral + IR_R_PID.error;
     IR_R_PID.derivative = IR_R_PID.error - IR_R_PID.lastError;
@@ -737,7 +743,6 @@ void robo_Halt()
 
 // Go Forward until Dist is reached - uses the selected PID
 void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist) { // dist used to be 75 for centering
-  double tempSpeed = targetSpeed;
   if(counter == 39)
   {
     targetSpeed = 1.0;
@@ -749,8 +754,11 @@ void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doubl
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      IR_L_PID.error = 0.0;
+      IR_L_PID.integral = 0.0;
+      IR_L_PID.derivative = 0.0;
+      //targetSpeed = tempSpeed;      
       caseStep[counter][19] = 1;
-      targetSpeed = tempSpeed;
     }
   } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
@@ -759,8 +767,11 @@ void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doubl
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      IR_R_PID.error = 0.0;
+      IR_R_PID.integral = 0.0;
+      IR_R_PID.derivative = 0.0;
+      targetSpeed = tempSpeed;      
       caseStep[counter][19] = 1;
-      targetSpeed = tempSpeed;
     }
   } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
@@ -770,8 +781,8 @@ void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doubl
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      //targetSpeed = tempSpeed;
       caseStep[counter][19] = 1;
-      targetSpeed = tempSpeed;
     }
   }
 }
@@ -785,6 +796,9 @@ void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      IR_L_PID.error = 0.0;
+      IR_L_PID.integral = 0.0;
+      IR_L_PID.derivative = 0.0;
       caseStep[counter][19] = 1;
     }
   } else if (PID_R_IR == 1) {
@@ -794,6 +808,9 @@ void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      IR_R_PID.error = 0.0;
+      IR_R_PID.integral = 0.0;
+      IR_R_PID.derivative = 0.0;
       caseStep[counter][19] = 1;
     }
   } else if (PID_encod == 1) {
@@ -817,6 +834,9 @@ void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      IR_L_PID.error = 0.0;
+      IR_L_PID.integral = 0.0;
+      IR_L_PID.derivative = 0.0;
       caseStep[counter][19] = 1;
     }
   } else if (PID_R_IR == 1) {
@@ -826,6 +846,9 @@ void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      IR_R_PID.error = 0.0;
+      IR_R_PID.integral = 0.0;
+      IR_R_PID.derivative = 0.0;
       caseStep[counter][19] = 1;
     }
   } else if (PID_encod == 1) {
@@ -849,6 +872,9 @@ void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      IR_L_PID.error = 0.0;
+      IR_L_PID.integral = 0.0;
+      IR_L_PID.derivative = 0.0;
       caseStep[counter][19] = 1;
     }
   } else if (PID_R_IR == 1) {
@@ -858,6 +884,9 @@ void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
       robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
+      IR_R_PID.error = 0.0;
+      IR_R_PID.integral = 0.0;
+      IR_R_PID.derivative = 0.0;
       caseStep[counter][19] = 1;
     }
   } else if (PID_encod == 1) {
@@ -887,6 +916,9 @@ void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doub
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       caseStep[counter][19] = 1;
+      IR_L_PID.error = 0.0;
+      IR_L_PID.integral = 0.0;
+      IR_L_PID.derivative = 0.0;
       //targetSpeed = tempSpeed;
     }
   } else if (PID_R_IR == 1) {
@@ -897,6 +929,9 @@ void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doub
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       caseStep[counter][19] = 1;
+      IR_R_PID.error = 0.0;
+      IR_R_PID.integral = 0.0;
+      IR_R_PID.derivative = 0.0;
       //targetSpeed = tempSpeed;
     }
   } else if (PID_encod == 1) {
@@ -907,6 +942,7 @@ void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doub
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       caseStep[counter][19] = 1;
+      //counter++;
       //targetSpeed = tempSpeed;
     }
   }
