@@ -1150,7 +1150,7 @@ float IRServo() {
   IR_Servo_Value = analogRead(IR_Servo_Reading); //take reading from sensor
 
   float Raw_Voltage_IRServo = IR_Servo_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
-  float Dis_IRServo = -29.642 * Raw_Voltage_IRServo + 69.236;
+  float Dis_IRServo = -29.642 * Raw_Voltage_IRServo + 72.236;
 
 //  Serial5.print("Servo IR Distance: ");
 //  Serial5.println(Dis_IRServo);
