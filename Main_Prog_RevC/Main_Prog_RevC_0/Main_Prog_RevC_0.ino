@@ -154,6 +154,11 @@ PID IR_R_PID;
 PID E_L_PID;
 PID E_R_PID;
 PID TURN_PID;
+PID IR_Difference_PID;
+
+// PID for difference between IR sensors
+
+
 
 // #################### MISC ####################
 const double pi = 3.14159265359;
@@ -316,6 +321,10 @@ void setup()
   IR_R_PID.Kp = 15.0; //15.0;
   IR_R_PID.Ki = 0.000005; //0.3;
   IR_R_PID.Kd = 3.0;
+
+  IR_Difference_PID.Kp = 1;
+  IR_Difference_PID.Ki = 0;
+  IR_Difference_PID.Kd = 0;
 
   TURN_PID.Kp = 0.3; //5.0;
   TURN_PID.Ki = 0.005; //0.1;
@@ -552,7 +561,14 @@ void loop()
     Distance_IRLeft = IRLeft(); 
     Distance_IRRight = IRRight();
 
-    // Calculate the PID
+    // Calculate PID for centring
+    IR_Difference_PID.error = IR_Difference(Distance_IRLeft, Distance_IRRight);
+    IR_Difference_PID.integral = IR_Difference_PID.integral + IR_Difference_PID.error;
+    IR_Difference_PID.derivative = IR_Difference_PID.error - IR_Difference_PID.lastError;
+    IR_Difference_PID.pid = (IR_Difference_PID.Kp * IR_Difference_PID.error) + (IR_Difference_PID.Ki * IR_Difference_PID.integral) + (IR_Difference_PID.Kd * IR_Difference_PID.derivative);
+    IR_Difference_PID.lastError = IR_Difference_PID.error;
+    
+  // Calculate the PID
     if(caseStep[counter][5] == 1)
     IR_L_PID.error = IR_L_Error(Distance_IRLeft);
 //    Serial5.print("\t");
@@ -1164,6 +1180,11 @@ float IRServo() {
 // Solves for the difference in the rotational speed of the wheel compared to a set value (in rad/sec)
 double encodError(double setVal, Wheel W) {
   return abs(W.curr_AngVel) - setVal;
+}
+ 
+// Solves for the difference between the left and right IR sensors
+double IR_Difference(float IRLeft, float IRRight) {
+  return IRLeft - IRRight;
 }
 
 // Solves for the difference between the left IR sensor and 8cm from left wall
