@@ -1,7 +1,13 @@
-
 #include <Servo.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
+
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
+
+#define PIN 40
 
 /*
    NOTE:
@@ -41,6 +47,8 @@
 #define MAX_DISTANCE 20.0
 #define MIN_DISTANCE 2.0
 #define NUM_CONDITIONS 64
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, PIN, NEO_GRB + NEO_KHZ800);
 
 
 // -------------------- Variable Definitions --------------------
@@ -279,10 +287,14 @@ void setup()
   IR_Servo.attach(38);                                            // servo to Digital pin 38
   IR_Servo.write(0);                                            // set servo to 0
   Arm_Servo.attach(37);                                            // servo to Digital pin 38
-  Arm_Servo.write(0);                                            // set servo to 0
+  Arm_Servo.write(90);                                            // set servo to 0
   Claw_Servo.attach(40);                                            // servo to Digital pin 38
   Claw_Servo.write(0);
 
+  // LED Detection
+  strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
+  
   // Setup Interrupts
   attachInterrupt(digitalPinToInterrupt(ENCOD1_PIN_L), Encod_ISR_L, RISING); // interrrupt 1 is data ready
   attachInterrupt(digitalPinToInterrupt(ENCOD3_PIN_R), Encod_ISR_R, RISING); // interrrupt 1 is data ready RISING
@@ -317,7 +329,7 @@ void setup()
 
   delay(5000);
   //
-  counter = 18;
+  //counter = 18;
   tempSpeed = targetSpeed;
 
   start_Time = millis() / 1000;
@@ -383,10 +395,12 @@ void loop()
       //   }
       - -----------------------------------------------------------------------------------------------
   */
-
+  
   //detour = true;
   if ((millis() - waitTimer[2]) > 50)
   {
+    //theaterChase(strip.Color(127, 0, 0), 50); // Red
+    rainbow(10);
     Serial.print("Counter: ");
     Serial.println(counter);
     Serial.print("Raw Left Distance: ");
@@ -1369,6 +1383,53 @@ float IRServo()
   return Dis_IRServo;
 
 }
+
+// LED Functions
+ 
+void rainbow(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, LEDWheelposition((i+j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+void theaterChase(uint32_t c, uint8_t wait) {
+  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
+    for (int q=0; q < 3; q++) {
+      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+        strip.setPixelColor(i+q, c);    //turn every third pixel on
+      }
+      strip.show();
+
+      delay(wait);
+
+      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+        strip.setPixelColor(i+q, 0);        //turn every third pixel off
+      }
+    }
+  }
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t LEDWheelposition(byte LEDWheel) {
+  LEDWheel = 255 - LEDWheel;
+  if(LEDWheel < 85) {
+    return strip.Color(255 - LEDWheel * 3, 0, LEDWheel * 3);
+  }
+  if(LEDWheel < 170) {
+    LEDWheel -= 85;
+    return strip.Color(0, LEDWheel * 3, 255 - LEDWheel * 3);
+  }
+  LEDWheel -= 170;
+  return strip.Color(LEDWheel * 3, 255 - LEDWheel * 3, 0);
+}
+
 // -------------------- Robot Localization Functions --------------------
 
 // -------------------- PID Functions --------------------
