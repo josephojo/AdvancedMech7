@@ -7,7 +7,7 @@
 #include <avr/power.h>
 #endif
 
-#define PIN 40
+#define PIN 32
 
 /*
    NOTE:
@@ -329,7 +329,7 @@ void setup()
 
   delay(5000);
   //
-  //counter = 18;
+  //counter = 7;
   tempSpeed = targetSpeed;
 
   start_Time = millis() / 1000;
@@ -399,13 +399,9 @@ void loop()
   //detour = true;
   if ((millis() - waitTimer[2]) > 50)
   {
-<<<<<<< HEAD
     //theaterChase(strip.Color(127, 0, 0), 50); // Red
-    rainbow(10);
+    //rainbow(10);
     Serial.print("Counter: ");
-=======
-    Serial.print("Cntr: ");
->>>>>>> NavigationTest
     Serial.println(counter);
     Serial.print("Raw Left Distance: ");
     Serial.print(Dis_IRLeft);
@@ -484,10 +480,10 @@ void loop()
       }
     }
 
-    if (counter == NUM_CONDITIONS) // Shake the miner off the arm
-    {
-      Shake_The_Bag();
-    }
+//    if (counter == NUM_CONDITIONS) // Shake the miner off the arm
+//    {
+//      Shake_The_Bag();
+//    }
 
     if (detour == true)
     {
@@ -1010,7 +1006,7 @@ void GoForward_IR_L(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8
 }
 
 //##### Go Forward until Right IR sensor doesn't detect a wall - uses the selected PID
-void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_LR_IR, uint8_t PID_encod) {
+void GoForward_IR_R(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_LR_IR ) {
   if (PID_L_IR == 1) {
     Forward(-IR_L_PID.pid);
     Serial5.print("Cntr: "); Serial5.print(counter);
