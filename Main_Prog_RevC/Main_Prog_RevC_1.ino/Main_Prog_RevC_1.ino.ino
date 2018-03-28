@@ -40,7 +40,7 @@
 
 #define MAX_DISTANCE 20.0
 #define MIN_DISTANCE 2.0
-#define NUM_CONDITIONS 81
+#define NUM_CONDITIONS 64
 
 
 // -------------------- Variable Definitions --------------------
@@ -141,7 +141,7 @@ struct PID {
   double error = 0.0;
   double pid;
 
-  void resetPID(){
+  void resetPID() {
     integral = 0.0;
     derivative = 0.0;
     lastError = 0.0;
@@ -154,7 +154,7 @@ PID IR_R_PID;
 PID E_L_PID;
 PID E_R_PID;
 PID TURN_PID;
-PID IR_Difference_PID;
+PID IR_LR_PID;
 
 // PID for difference between IR sensors
 
@@ -183,91 +183,72 @@ float Dis_IRRight = 0.0; //Used for the raw/uncapped values for the right IR sen
 
 double prevvy = 0.0;
 
-int caseStep [][NUM_CONDITIONS] = 
+int caseStep [][17] =
 {
-{0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0  },
-{1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0  },
-{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,88,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },//97
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0  },
-{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,150,0,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0  },
-{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },//95
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,1,0,0,0,405,0,0,0,0,0,0,0,0,0,0},
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,150,0,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,180,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },//98
-{1,0,0,0,1,0,0,0,0,150,0,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,0,1,0,0,130,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,70,0,0,0 },
-{0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0  },
-{0,1,0,0,1,0,0,0,0,280,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,150,0,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0  },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0  },
-{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0  },
-{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,150,0,0,0,0,0,0,0,0,0,0},
-{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0  },
-{1,0,0,0,1,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,1,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0 },
-{1,0,0,0,0,1,0,0,0,230,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0  }
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  },
+  {1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0  },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 120, 0, 0, 0, 0, 0, 0},
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0  },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 120, 0, 0, 0, 0, 0, 0},
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 111, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 111, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 70, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0  },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0},
+  {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  },
+  {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0 },
+  {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 111, 0, 0, 0, 0, 0, 0}
 };
 
 // ************************* End of Definitions *********************************
@@ -289,6 +270,11 @@ void setup()
   pinMode(ENCOD3_PIN_R, INPUT);
   pinMode(ENCOD4_PIN_R, INPUT);
 
+  pinMode(IR_Servo_Reading, INPUT);
+  pinMode(IR_Left_Reading, INPUT);
+  pinMode(IR_Front_Reading, INPUT);
+  pinMode(IR_Right_Reading, INPUT);
+
   // IR servo control set up
   IR_Servo.attach(38);                                            // servo to Digital pin 38
   IR_Servo.write(0);                                            // set servo to 0
@@ -296,12 +282,6 @@ void setup()
   Arm_Servo.write(0);                                            // set servo to 0
   Claw_Servo.attach(40);                                            // servo to Digital pin 38
   Claw_Servo.write(0);
-
-  pinMode(IR_Servo_Reading, INPUT);
-  pinMode(IR_Left_Reading, INPUT);
-  pinMode(IR_Front_Reading, INPUT);
-  pinMode(IR_Right_Reading, INPUT);
-
 
   // Setup Interrupts
   attachInterrupt(digitalPinToInterrupt(ENCOD1_PIN_L), Encod_ISR_L, RISING); // interrrupt 1 is data ready
@@ -315,7 +295,7 @@ void setup()
   E_R_PID.Ki = 0.1; //0.1;
   E_R_PID.Kd = 0.3; //0.3;
 
-  IR_L_PID.Kp = 8.0;//15.0; 
+  IR_L_PID.Kp = 8.0;//15.0;
   IR_L_PID.Ki = 0.000005;
   IR_L_PID.Kd = 3.0; //5.0;
 
@@ -323,9 +303,9 @@ void setup()
   IR_R_PID.Ki = 0.000005; //0.3;
   IR_R_PID.Kd = 3.0;
 
-  IR_Difference_PID.Kp = 1;
-  IR_Difference_PID.Ki = 0;
-  IR_Difference_PID.Kd = 0;
+  IR_LR_PID.Kp = 1;
+  IR_LR_PID.Ki = 0;
+  IR_LR_PID.Kd = 0;
 
   TURN_PID.Kp = 0.3; //5.0;
   TURN_PID.Ki = 0.003; //0.1;
@@ -337,7 +317,7 @@ void setup()
 
   delay(5000);
   //
-   //counter = 0;
+  counter = 18;
   tempSpeed = targetSpeed;
 
   start_Time = millis() / 1000;
@@ -403,10 +383,10 @@ void loop()
       //   }
       - -----------------------------------------------------------------------------------------------
   */
-   
+
   //detour = true;
   if ((millis() - waitTimer[2]) > 50)
-  { 
+  {
     Serial.print("Counter: ");
     Serial.println(counter);
     Serial.print("Raw Left Distance: ");
@@ -420,27 +400,28 @@ void loop()
     Serial.print("\t");
     Serial.print("Right Distance: ");
     Serial.println(Distance_IRRight);
+
     if (detour == false && counter < NUM_CONDITIONS)
     {
       // --------- Robot Movement --------
       if (caseStep[counter][0] == 1) // If asked to go forward
       {
-        if (caseStep[counter][7] == 1) { //If asked to stop when left IR doesn't see a wall
+        if (caseStep[counter][8] == 1) { //If asked to stop when left IR doesn't see a wall
 
-          GoForward_IR_L(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
-          
+          GoForward_IR_L(caseStep[counter][4], caseStep[counter][5], caseStep[counter][6], caseStep[counter][7]);
 
-        } else if (caseStep[counter][8] == 1) { //If asked to stop when right IR doesn't see a wall
 
-          GoForward_IR_R(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
+        } else if (caseStep[counter][9] == 1) { //If asked to stop when right IR doesn't see a wall
 
-        } else if (caseStep[counter][11] == 1) { //If asked to stop when front IR sees a wall
+          GoForward_IR_R(caseStep[counter][4], caseStep[counter][5], caseStep[counter][6], caseStep[counter][7]);
 
-          GoForward_IR_F(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4]);
+        } else if (caseStep[counter][12] == 1) { //If asked to stop when front IR sees a wall
 
-        } else if (caseStep[counter][9] > 0) { //If asked to stop after a distance
+          GoForward_IR_F(caseStep[counter][4], caseStep[counter][5], caseStep[counter][6], caseStep[counter][7]);
 
-          GoForward_Dist(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4], caseStep[counter][9]);
+        } else if (caseStep[counter][10] > 0) { //If asked to stop after a distance
+
+          GoForward_Dist(caseStep[counter][4], caseStep[counter][5], caseStep[counter][6], caseStep[counter][7], caseStep[counter][9]);
           //Serial5.println(caseStep[counter][9]);
 
 
@@ -451,89 +432,61 @@ void loop()
       }
       else if (caseStep[counter][1] == 1) // If asked to go Backward
       {
-        GoBackward_Dist(caseStep[counter][5], caseStep[counter][6], caseStep[counter][4], (double)caseStep[counter][9]);
+        GoBackward_Dist(caseStep[counter][4], caseStep[counter][5], caseStep[counter][6], caseStep[counter][7], (double)caseStep[counter][9]);
       }
       else if (caseStep[counter][2] == 1) // If asked to Turn right
       {
-        TurnRight_Ang(caseStep[counter][10]);
-        //Turn_Ang(caseStep[counter][10]);
+        TurnRight_Ang(caseStep[counter][11]);
+        //Turn_Ang(caseStep[counter][11]);
       }
       else if (caseStep[counter][3] == 1) // If asked to Turn Left
       {
-        TurnLeft_Ang(-caseStep[counter][10]);
-        //Turn_Ang(-caseStep[counter][10]);
+        TurnLeft_Ang(-caseStep[counter][11]);
+        //Turn_Ang(-caseStep[counter][11]);
       }
       else {
-        caseStep[counter][19] = 1;
+        caseStep[counter][15] = 1;
       }
 
 
       // ---------- Arm Movement -------
-      if (caseStep[counter][12] == 1) // If asked to Move Arm
+      if (caseStep[counter][13] == 1) // If asked to Move Arm
       {
-        MoveArm_Ang(caseStep[counter][16]);
-        
-      } else if (caseStep[counter][13] == 1) // If asked to Reset Arm Location
-      {
-        MoveArm_Ang(0);
+        MoveArm_Ang(caseStep[counter][14]);
       } else {
-        caseStep[counter][20] = 1;
+        caseStep[counter][16] = 1;
       }
 
-      if (caseStep[counter][15] == 1) // If asked to Grip
-      {
+      // Implement code to do something when the obstacle is seen here
+      //if(Distance_IRFront
 
-      } else if (caseStep[counter][16] == 1) // If asked to Release Grip
-      {
 
-      } else {
-        caseStep[counter][18] = 1;
-      }
 
-      if (caseStep[counter][16] == 1) // If asked to Scan
-      {
-        Shake_The_Bag();
-      }
-
-      if (caseStep[counter][18] == 1 && caseStep[counter][19] == 1 && caseStep[counter][20] == 1) {
+      if (caseStep[counter][15] == 1 && caseStep[counter][16] == 1) {
         counter++;
       }
     }
 
+    if (counter == NUM_CONDITIONS) // Shake the miner off the arm
+    {
+      Shake_The_Bag();
+    }
+
     if (detour == true)
     {
-      //Leftward(0);
-      //TurnLeft_Ang(-90);
-      if (counter <= 1) {
-        
-      Turn_Ang(-90);
-      Serial5.print(whl_R.curr_AngVel);
-    Serial5.print("\t");
-    Serial5.println(whl_L.curr_AngVel);
-      
-      
-      //Forward(E_L_PID.pid, E_R_PID.pid);
-      
-         //counter++;
+      if (counter <= 1)
+      {
+        Turn_Ang(-90);
+        Serial5.print(whl_R.curr_AngVel);
+        Serial5.print("\t");
+        Serial5.println(whl_L.curr_AngVel);
       }
-      
-      
-      //Forward(-IR_L_PID.pid);
-      //Forward(IR_R_PID.pid);
-      //Rightward(E_L_PID.pid, E_R_PID.pid);
-      //Leftward(E_L_PID.pid, E_R_PID.pid);
-      //Forward(E_L_PID.pid, E_R_PID.pid);
-      //Serial5.println("In Detour");
-      //GoBackward_Dist(0, 0, 1, 300);
-      //Backward(E_L_PID.pid, E_R_PID.pid);
-      
-
     }
 
     waitTimer[2] = millis();
   }
 
-  // Updates all variables for calculations every 50 ms
+  // Updates all variables for calculations every 25 ms
   if ((millis() - waitTimer[1]) > 25)
   {
     cli();
@@ -550,71 +503,73 @@ void loop()
     // Get the current speed of the motors
     whl_L.curr_AngVel = whl_AngVel_L(delta_L);
     whl_R.curr_AngVel = whl_AngVel_R(delta_R);
-//
-//    Serial5.print(whl_R.curr_AngVel);
-//    Serial5.print("\t");
-//    Serial5.println(whl_L.curr_AngVel);
-//    Serial5.print("\t");
-//    Serial5.print("Distance_IRL: ");
-//  Serial5.print(Distance_IRLeft);
-    
+    //
+    //    Serial5.print(whl_R.curr_AngVel);
+    //    Serial5.print("\t");
+    //    Serial5.println(whl_L.curr_AngVel);
+    //    Serial5.print("\t");
+    //    Serial5.print("Distance_IRL: ");
+    //  Serial5.print(Distance_IRLeft);
+
     // Update change in wheel distances
     whl_L.del_Dist = whlDeltaD_L(delta_L);
     whl_R.del_Dist = whlDeltaD_R(delta_R);
 
     // Gets Capped values of IR Sensors
-    Distance_IRLeft = IRLeft(); 
+    Distance_IRLeft = IRLeft();
     Distance_IRRight = IRRight();
 
-    // Calculate PID for centring
-    IR_Difference_PID.error = IR_Difference(Distance_IRLeft, Distance_IRRight);
-    IR_Difference_PID.integral = IR_Difference_PID.integral + IR_Difference_PID.error;
-    IR_Difference_PID.derivative = IR_Difference_PID.error - IR_Difference_PID.lastError;
-    IR_Difference_PID.pid = (IR_Difference_PID.Kp * IR_Difference_PID.error) + (IR_Difference_PID.Ki * IR_Difference_PID.integral) + (IR_Difference_PID.Kd * IR_Difference_PID.derivative);
-    IR_Difference_PID.lastError = IR_Difference_PID.error;
-    
-  // Calculate the PID
-    if(caseStep[counter][5] == 1)
-    IR_L_PID.error = IR_L_Error(Distance_IRLeft);
-//    Serial5.print("\t");
-//    Serial5.print("IR_L_PID.error: ");
-//  Serial5.println(IR_L_PID.error);
+
+    // Calculate the PID
+    if (caseStep[counter][5] == 1)
+      IR_L_PID.error = IR_L_Error(Distance_IRLeft);
+    //    Serial5.print("\t");
+    //    Serial5.print("IR_L_PID.error: ");
+    //  Serial5.println(IR_L_PID.error);
     IR_L_PID.integral = IR_L_PID.integral + IR_L_PID.error;
     IR_L_PID.derivative = IR_L_PID.error - IR_L_PID.lastError;
     IR_L_PID.pid = (IR_L_PID.Kp * IR_L_PID.error) + (IR_L_PID.Ki * IR_L_PID.integral) + (IR_L_PID.Kd * IR_L_PID.derivative);
     IR_L_PID.lastError = IR_L_PID.error;
 
-    if(caseStep[counter][6] == 1)
-    IR_R_PID.error = IR_R_Error(Distance_IRRight);
+    if (caseStep[counter][6] == 1)
+      IR_R_PID.error = IR_R_Error(Distance_IRRight);
     IR_R_PID.integral = IR_R_PID.integral + IR_R_PID.error;
     IR_R_PID.derivative = IR_R_PID.error - IR_R_PID.lastError;
     IR_R_PID.pid = (IR_R_PID.Kp * IR_R_PID.error) + (IR_R_PID.Ki * IR_R_PID.integral) + (IR_R_PID.Kd * IR_R_PID.derivative);
     IR_R_PID.lastError = IR_R_PID.error;
 
-    if(caseStep[counter][0] == 1 || caseStep[counter][1] == 1)
+    // Calculate PID for centering
+    if (caseStep[counter][7] == 1)
+      IR_LR_PID.error = IR_Difference(Distance_IRLeft, Distance_IRRight);
+    IR_LR_PID.integral = IR_LR_PID.integral + IR_LR_PID.error;
+    IR_LR_PID.derivative = IR_LR_PID.error - IR_LR_PID.lastError;
+    IR_LR_PID.pid = (IR_LR_PID.Kp * IR_LR_PID.error) + (IR_LR_PID.Ki * IR_LR_PID.integral) + (IR_LR_PID.Kd * IR_LR_PID.derivative);
+    IR_LR_PID.lastError = IR_LR_PID.error;
+
+    if (caseStep[counter][0] == 1 || caseStep[counter][1] == 1)
     {
       E_L_PID.error = encodError(targetSpeed, whl_L);
     }
-    
+
     E_L_PID.integral = E_L_PID.integral + E_L_PID.error;
     E_L_PID.derivative = E_L_PID.error - E_L_PID.lastError;
     E_L_PID.pid = (E_L_PID.Kp * E_L_PID.error) + (E_L_PID.Ki * E_L_PID.integral) + (E_L_PID.Kd * E_L_PID.derivative);
     E_L_PID.lastError = E_L_PID.error;
 
-    if(caseStep[counter][0] == 1 || caseStep[counter][1] == 1)
+    if (caseStep[counter][0] == 1 || caseStep[counter][1] == 1)
     {
       E_R_PID.error = encodError(targetSpeed, whl_R);
-    }   
-    
+    }
+
     E_R_PID.integral = E_R_PID.integral + E_R_PID.error;
     E_R_PID.derivative = E_R_PID.error - E_R_PID.lastError;
     E_R_PID.pid = (E_R_PID.Kp * E_R_PID.error) + (E_R_PID.Ki * E_R_PID.integral) + (E_R_PID.Kd * E_R_PID.derivative);
     E_R_PID.lastError = E_R_PID.error;
 
-    if(caseStep[counter][2] == 1)// if asked to turn left
+    if (caseStep[counter][2] == 1) // if asked to turn left
     {
       TURN_PID.error = turnError(caseStep[counter][10]);
-    }else if(caseStep[counter][3] == 1) // if asked to turn left
+    } else if (caseStep[counter][3] == 1) // if asked to turn right
     {
       TURN_PID.error = turnError(-caseStep[counter][10]);
     }
@@ -623,7 +578,7 @@ void loop()
     TURN_PID.derivative = TURN_PID.error - TURN_PID.lastError;
     TURN_PID.pid = (TURN_PID.Kp * TURN_PID.error) + (TURN_PID.Ki * TURN_PID.integral) + (TURN_PID.Kd * TURN_PID.derivative);
     TURN_PID.lastError = TURN_PID.error;
-    
+
 
     Distance_IRFront = IRFront();
     Distance_IRServo = IRServo();
@@ -796,54 +751,73 @@ void robo_Halt()
 
 // ################## High Level Robot Control #############
 
-// Go Forward until Dist is reached - uses the selected PID
-void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist) { // dist used to be 75 for centering
-//  if(counter == 39)
-//  {
-//    targetSpeed = 1.0;
-//    Serial5.println("Slowing Down Motor!");
-//  }
-  if (PID_L_IR == 1) {
+//#### Go Forward until Dist is reached - uses the selected PID
+void GoForward_Dist(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_LR_IR, double dist)  // dist used to be 75 for centering
+{
+  if (PID_L_IR == 1)
+  {
     Forward(-IR_L_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward - Using Left IR Sensor - Until Distance : ");Serial5.println(abs(robo.curr_Pos - prev_Dist));
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Left IR Sensor - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (abs(robo.curr_Pos - prev_Dist) > dist) //x
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      //targetSpeed = tempSpeed;      
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
     }
-  } else if (PID_R_IR == 1) {
+  } else if (PID_R_IR == 1)
+  {
     Forward(IR_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward - Using Right IR Sensor - Until Distance : ");Serial5.println(abs(robo.curr_Pos - prev_Dist));
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Right IR Sensor - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (abs(robo.curr_Pos - prev_Dist) > dist)//x
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      targetSpeed = tempSpeed;      
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      targetSpeed = tempSpeed;
+      caseStep[counter][15] = 1;
+    }
+  } else if (PID_LR_IR == 1)
+  {
+    Forward(IR_LR_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Both IR Sensors - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (abs(robo.curr_Pos - prev_Dist) > dist)//x
+    {
+      //robo_Halt();
+      prev_Dist = robo.curr_Pos; //x
+      prev_Ang = robo.curr_Orien;
+      TURN_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      targetSpeed = tempSpeed;
+      caseStep[counter][15] = 1;
     }
   } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward -     Using Encoders    - Until Distance : ");Serial5.println(abs(robo.curr_Pos - prev_Dist));
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward -     Using Encoders    - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     //Serial5.println("Heyyy");
     if (abs(robo.curr_Pos - prev_Dist) > dist)//x
     {
@@ -851,255 +825,334 @@ void GoForward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, doubl
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
       //targetSpeed = tempSpeed;
-      caseStep[counter][19] = 1;
+      caseStep[counter][15] = 1;
     }
   }
 }
 
-// Go Forward until Front IR sensor detects a wall - uses the selected PID
-void GoForward_IR_F(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
-  if (PID_L_IR == 1) {
+//#### Go Forward until Front IR sensor detects a wall - uses the selected PID
+void GoForward_IR_F(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_LR_IR)
+{
+  if (PID_L_IR == 1)
+  {
     Forward(-IR_L_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward - Using Left IR Sensor - Until Front is Blocked : ");Serial5.println(Distance_IRFront);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Left IR Sensor - Until Front is Blocked : "); Serial5.println(Distance_IRFront);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (Distance_IRFront <= targetDist_Front)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
     }
   } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward - Using Right IR Sensor - Until Front is Blocked : ");Serial5.println(Distance_IRFront);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Right IR Sensor - Until Front is Blocked : "); Serial5.println(Distance_IRFront);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (Distance_IRFront <= targetDist_Front)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();;
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
     }
-  } else if (PID_encod == 1) {
-    Forward(E_L_PID.pid, E_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward -     Using Encoders    - Until Front is Blocked : ");Serial5.println(Distance_IRFront);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+  } else if (PID_LR_IR == 1) {
+    Forward(IR_LR_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Both IR Sensors - Until Front is Blocked : "); Serial5.println(Distance_IRFront);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (Distance_IRFront <= targetDist_Front)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
-    }
-  }
-}
-
-// Go Forward until Left IR sensor doesn't detect a wall - uses the selected PID
-void GoForward_IR_L(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
-  if (PID_L_IR == 1) {
-    Forward(-IR_L_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward - Using Left IR Sensor - Until Left IR is Open : ");Serial5.println(Dis_IRLeft);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
-    if (Dis_IRLeft >= MAX_DISTANCE)
-    {
-      //robo_Halt();
-      prev_Dist = robo.curr_Pos; //x
-      prev_Ang = robo.curr_Orien;
-      TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
-    }
-  } else if (PID_R_IR == 1) {
-    Forward(IR_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward - Using Right IR Sensor - Until Left IR is Open : ");Serial5.println(Dis_IRLeft);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
-    if (Dis_IRLeft >= MAX_DISTANCE)
-    {
-      //robo_Halt();
-      prev_Dist = robo.curr_Pos; //x
-      prev_Ang = robo.curr_Orien;
-      TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
     }
   } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward -     Using Encoders    - Until Left IR is Open : ");Serial5.println(Dis_IRLeft);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward -     Using Encoders    - Until Front is Blocked : "); Serial5.println(Distance_IRFront);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (Distance_IRFront <= targetDist_Front)
+    {
+      //robo_Halt();
+      prev_Dist = robo.curr_Pos; //x
+      prev_Ang = robo.curr_Orien;
+      TURN_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
+    }
+  }
+}
+
+//### Go Forward until Left IR sensor doesn't detect a wall - uses the selected PID
+void GoForward_IR_L(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_LR_IR) {
+  if (PID_L_IR == 1) {
+    Forward(-IR_L_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Left IR Sensor - Until Left IR is Open : "); Serial5.println(Dis_IRLeft);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (Dis_IRLeft >= MAX_DISTANCE)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
-    }
-  }
-}
-
-// Go Forward until Right IR sensor doesn't detect a wall - uses the selected PID
-void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod) {
-  if (PID_L_IR == 1) {
-    Forward(-IR_L_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward - Using Left IR Sensor - Until Right IR is Open : ");Serial5.println(Dis_IRRight);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
-    if (Dis_IRRight >= MAX_DISTANCE)
-    {
-      //robo_Halt();
-      prev_Dist = robo.curr_Pos; //x
-      prev_Ang = robo.curr_Orien;
-      TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
     }
   } else if (PID_R_IR == 1) {
     Forward(IR_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward - Using Right IR Sensor - Until Right IR is Open : ");Serial5.println(Dis_IRRight);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
-    if (Dis_IRRight >= MAX_DISTANCE)
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Right IR Sensor - Until Left IR is Open : "); Serial5.println(Dis_IRLeft);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (Dis_IRLeft >= MAX_DISTANCE)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
+    }
+  } else if (PID_LR_IR == 1) {
+    Forward(IR_LR_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Both IR Sensors - Until Left IR is Open : "); Serial5.println(Dis_IRLeft);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (Dis_IRLeft >= MAX_DISTANCE)
+    {
+      //robo_Halt();
+      prev_Dist = robo.curr_Pos; //x
+      prev_Ang = robo.curr_Orien;
+      TURN_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
     }
   } else if (PID_encod == 1) {
     Forward(E_L_PID.pid, E_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Forward -     Using Encoders    - Until Right IR is Open : ");Serial5.println(Dis_IRRight);
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
-    if (Dis_IRRight >= MAX_DISTANCE)
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward -     Using Encoders    - Until Left IR is Open : "); Serial5.println(Dis_IRLeft);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (Dis_IRLeft >= MAX_DISTANCE)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
     }
   }
 }
 
-// Go Backward until Dist is reached - uses the selected PID
-void GoBackward_Dist(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_encod, double dist) {
-//  double tempSpeed = targetSpeed;
-//  if(counter == 42)
-//  {
-//    targetSpeed = 1.0;
-//  }
+//##### Go Forward until Right IR sensor doesn't detect a wall - uses the selected PID
+void GoForward_IR_R(uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_LR_IR, uint8_t PID_encod) {
+  if (PID_L_IR == 1) {
+    Forward(-IR_L_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Left IR Sensor - Until Right IR is Open : "); Serial5.println(Dis_IRRight);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (Dis_IRRight >= MAX_DISTANCE)
+    {
+      //robo_Halt();
+      prev_Dist = robo.curr_Pos; //x
+      prev_Ang = robo.curr_Orien;
+      TURN_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
+    }
+  } else if (PID_R_IR == 1) {
+    Forward(IR_R_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Right IR Sensor - Until Right IR is Open : "); Serial5.println(Dis_IRRight);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (Dis_IRRight >= MAX_DISTANCE)
+    {
+      //robo_Halt();
+      prev_Dist = robo.curr_Pos; //x
+      prev_Ang = robo.curr_Orien;
+      TURN_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
+    }
+  } else if (PID_LR_IR == 1) {
+    Forward(IR_LR_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward - Using Both IR Sensors - Until Right IR is Open : "); Serial5.println(Dis_IRRight);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (Dis_IRRight >= MAX_DISTANCE)
+    {
+      //robo_Halt();
+      prev_Dist = robo.curr_Pos; //x
+      prev_Ang = robo.curr_Orien;
+      TURN_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
+    }
+  } else if (PID_encod == 1) {
+    Forward(E_L_PID.pid, E_R_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Forward -     Using Encoders    - Until Right IR is Open : "); Serial5.println(Dis_IRRight);
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (Dis_IRRight >= MAX_DISTANCE)
+    {
+      //robo_Halt();
+      prev_Dist = robo.curr_Pos; //x
+      prev_Ang = robo.curr_Orien;
+      TURN_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
+    }
+  }
+}
+
+//##### Go Backward until Dist is reached - uses the selected PID
+void GoBackward_Dist(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8_t PID_LR_IR, double dist) {
   if (PID_L_IR == 1) {
     Backward(-IR_L_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Backwrd - Using Left IR Sensor - Until Distance : ");Serial5.println(abs(robo.curr_Pos - prev_Dist));
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Backwrd - Using Left IR Sensor - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (abs(robo.curr_Pos - prev_Dist) > dist)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
-      caseStep[counter][19] = 1;
+      caseStep[counter][15] = 1;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      //targetSpeed = tempSpeed;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
     }
   } else if (PID_R_IR == 1) {
     Backward(IR_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Backwrd - Using Right IR Sensor - Until Distance : ");Serial5.println(abs(robo.curr_Pos - prev_Dist));
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Backwrd - Using Right IR Sensor - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (abs(robo.curr_Pos - prev_Dist) > dist)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
-      caseStep[counter][19] = 1;
+      caseStep[counter][15] = 1;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      //targetSpeed = tempSpeed;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+    }
+  } else if (PID_LR_IR == 1) {
+    Backward(IR_LR_PID.pid);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Backwrd - Using Both IR Sensors - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    if (abs(robo.curr_Pos - prev_Dist) > dist)
+    {
+      //robo_Halt();
+      prev_Dist = robo.curr_Pos; //x
+      prev_Ang = robo.curr_Orien;
+      caseStep[counter][15] = 1;
+      TURN_PID.resetPID();
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
     }
   } else if (PID_encod == 1) {
     Backward(E_L_PID.pid, E_R_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-    Serial5.print(" - Go Backwrd -     Using Encoders    - Until Distance : ");Serial5.println(abs(robo.curr_Pos - prev_Dist));
-    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Go Backwrd -     Using Encoders    - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
     if (abs(robo.curr_Pos - prev_Dist) > dist)
     {
       //robo_Halt();
       prev_Dist = robo.curr_Pos; //x
       prev_Ang = robo.curr_Orien;
       TURN_PID.resetPID();
-    IR_L_PID.resetPID();
-    IR_R_PID.resetPID();
-    E_L_PID.resetPID();
-    E_R_PID.resetPID();
-      caseStep[counter][19] = 1;
+      IR_L_PID.resetPID();
+      IR_R_PID.resetPID();
+      IR_LR_PID.resetPID();
+      E_L_PID.resetPID();
+      E_R_PID.resetPID();
+      caseStep[counter][15] = 1;
       //counter++;
-      //targetSpeed = tempSpeed;
     }
   }
 }
 
-// Turn Right until Angle is reached
+//##### Turn Right until Angle is reached
 void TurnRight_Ang(int ang) { // Angle used to be 90 - 10
   Rightward(E_L_PID.pid, E_R_PID.pid);
-  Serial5.print("Counter: "); Serial5.print(counter); 
-  Serial5.print(" - Turn Right -     Using Encoders    - Until Angle    : ");Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));
-  Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+  Serial5.print("Counter: "); Serial5.print(counter);
+  Serial5.print(" - Turn Right -     Using Encoders    - Until Angle    : "); Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));
+  Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
   if (rad2Deg(robo.curr_Orien - prev_Ang) > ang - 10)
   {
     //robo_Halt();
@@ -1108,18 +1161,20 @@ void TurnRight_Ang(int ang) { // Angle used to be 90 - 10
     TURN_PID.resetPID();
     IR_L_PID.resetPID();
     IR_R_PID.resetPID();
+    IR_LR_PID.resetPID();
     E_L_PID.resetPID();
     E_R_PID.resetPID();
-    caseStep[counter][19] = 1;
+    caseStep[counter][15] = 1;
   }
 }
 
-// Turn Left until Angle is reached
-void TurnLeft_Ang(int ang) { // Angle used to be -90 + 7
+//##### Turn Left until Angle is reached
+void TurnLeft_Ang(int ang) // Angle used to be -90 + 7
+{
   Leftward(E_L_PID.pid, E_R_PID.pid);
-  Serial5.print("Counter: "); Serial5.print(counter); 
-  Serial5.print(" - Turn Leftt -     Using Encoders    - Until Angle    : ");Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));
-  Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+  Serial5.print("Counter: "); Serial5.print(counter);
+  Serial5.print(" - Turn Leftt -     Using Encoders    - Until Angle    : "); Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));
+  Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
   //Serial5.println("LEFT");
   if (rad2Deg(robo.curr_Orien - prev_Ang) < ang + 12)
   {
@@ -1129,49 +1184,51 @@ void TurnLeft_Ang(int ang) { // Angle used to be -90 + 7
     TURN_PID.resetPID();
     IR_L_PID.resetPID();
     IR_R_PID.resetPID();
+    IR_LR_PID.resetPID();
     E_L_PID.resetPID();
     E_R_PID.resetPID();
-    caseStep[counter][19] = 1;
+    caseStep[counter][15] = 1;
   }
 }
 
-// Turn until Angle is reached
+//#### Turn until Angle is reached
 void Turn_Ang(int ang) {
   double tempSpeed = targetSpeed;
   //targetSpeed = 1.5;
-  
+
   //  Serial5.println("In TurnLeft");
   //  Serial5.print("\t");
-//  Serial5.print("TURN_PID.Error: "); Serial5.println(TURN_PID.error);
-//  Serial5.print("TURN_PID.Pid: "); Serial5.println(TURN_PID.pid);
+  //  Serial5.print("TURN_PID.Error: "); Serial5.println(TURN_PID.error);
+  //  Serial5.print("TURN_PID.Pid: "); Serial5.println(TURN_PID.pid);
 
   if (TURN_PID.error < -2)
   {
     Leftward(TURN_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-  Serial5.print(" - Turn Leftt -     Using Encoders    - Until Angle    : ");Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));
-  Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Turn Leftt -     Using Encoders    - Until Angle    : "); Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
 
     //Serial5.println("ello");
   } else if (TURN_PID.error > 2)
   {
     Rightward(TURN_PID.pid);
-    Serial5.print("Counter: "); Serial5.print(counter); 
-  Serial5.print(" - Turn Right -     Using Encoders    - Until Angle    : ");Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));
-  Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel);Serial5.print("\t");Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
+    Serial5.print("Counter: "); Serial5.print(counter);
+    Serial5.print(" - Turn Right -     Using Encoders    - Until Angle    : "); Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));
+    Serial5.print("Left Speed: "); Serial5.print(whl_L.curr_AngVel); Serial5.print("\t"); Serial5.print("Right Speed: "); Serial5.println(whl_R.curr_AngVel);
   } else
   {
     //robo_Halt();
     TURN_PID.resetPID();
     IR_L_PID.resetPID();
     IR_R_PID.resetPID();
+    IR_LR_PID.resetPID();
     E_L_PID.resetPID();
     E_R_PID.resetPID();
     targetSpeed = tempSpeed;
     prev_Dist = robo.curr_Pos;
     prev_Ang = robo.curr_Orien;
     //counter++;
-    caseStep[counter][19] = 1;
+    caseStep[counter][15] = 1;
   }
 }
 
@@ -1185,13 +1242,15 @@ void Turn_Ang(int ang) {
 void MoveArm_Ang(int ang) {
   Arm_Servo.write(ang);
   delay(500);
-  caseStep[counter][20] = 1;
+  Arm_Servo.write(0);
+  delay(500);
+  caseStep[counter][16] = 1;
 }
 
 void MoveClaw_Ang(int ang) {
   Claw_Servo.write(ang);
   delay(500);
-  caseStep[counter][18] = 1;
+  //caseStep[counter][18] = 1;
 }
 void Shake_The_Bag() {
   Arm_Servo.write(0);
@@ -1205,13 +1264,12 @@ void Shake_The_Bag() {
 
 //-------------------------IR Sensors-------------------------
 double IR_Servo_Scan() {
-
   for (pos = 0; pos <= 40; pos += 1) {          // goes from 0 degrees to 60 degrees
     IR_Servo.write(pos);                           // tell servo to go to position in variable 'pos'
     if (pos == 0 || pos == 10 || pos == 20 || pos == 30 || pos == 40) {
       float Dis_IRServo = IRServo();
-//      Serial5.print("Servo IR Distance: ");
-//      Serial5.println(Dis_IRServo);
+      //      Serial5.print("Servo IR Distance: ");
+      //      Serial5.println(Dis_IRServo);
       return Dis_IRServo;
     }
     delay(15);                       // waits 15ms for the servo to reach the position
@@ -1221,8 +1279,8 @@ double IR_Servo_Scan() {
     IR_Servo.write(pos);                                     // tell servo to go to position in variable 'pos'
     if (pos == 0 || pos == 10 || pos == 20 || pos == 30 || pos == 40) {
       float Dis_IRServo = IRServo();
-//      Serial5.print("Servo IR Distance: ");
-//      Serial5.println(Dis_IRServo);
+      //      Serial5.print("Servo IR Distance: ");
+      //      Serial5.println(Dis_IRServo);
       return Dis_IRServo;
     }
     delay(15);                       // waits 15ms for the servo to reach the position
@@ -1238,14 +1296,13 @@ float IRFront() {
   float Raw_Voltage_IRFront = IR_Front_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
   float Dis_IRFront = -29.642 * Raw_Voltage_IRFront + 71.236;
 
-//  Serial5.print("Front IR Distance: ");
-//  Serial5.println(Distance_IRFront);
+  //  Serial5.print("Front IR Distance: ");
+  //  Serial5.println(Distance_IRFront);
 
   return Dis_IRFront;
 }
 
 float IRRight() {
-
   double IR_Right_Value;
   analogReadResolution(10);
   analogReadAveraging(100);
@@ -1254,8 +1311,8 @@ float IRRight() {
   float Raw_Voltage_IRRight = IR_Right_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
   Dis_IRRight = -29.642 * Raw_Voltage_IRRight + 69.236;
 
-//  Serial5.print("Right IR Distance: ");
-//  Serial5.println(Dis_IRRight);
+  //  Serial5.print("Right IR Distance: ");
+  //  Serial5.println(Dis_IRRight);
   float distanceGood_R = 0.0;
 
   if (Dis_IRRight < MAX_DISTANCE && Dis_IRRight > MIN_DISTANCE) {
@@ -1271,7 +1328,6 @@ float IRRight() {
 }
 
 float IRLeft() {
-
   double IR_Left_Value;
   analogReadResolution(10);
   analogReadAveraging(100);
@@ -1280,8 +1336,8 @@ float IRLeft() {
   float Raw_Voltage_IRLeft = IR_Left_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
   Dis_IRLeft = -29.642 * Raw_Voltage_IRLeft + 71.236;
 
-//  Serial5.print("Left IR Distance: ");
-//  Serial5.println(Dis_IRLeft);
+  //  Serial5.print("Left IR Distance: ");
+  //  Serial5.println(Dis_IRLeft);
 
   float distanceGood_L = 0.0;
 
@@ -1298,8 +1354,8 @@ float IRLeft() {
   return distanceGood_L;
 }
 
-float IRServo() {
-
+float IRServo()
+{
   double IR_Servo_Value;
   analogReadResolution(10);
   analogReadAveraging(100);
@@ -1308,10 +1364,10 @@ float IRServo() {
   float Raw_Voltage_IRServo = IR_Servo_Value * 0.00322265625; //convert analog reading to voltage (5V/1024bit=0.0048828125)(3.3V/1024bit =0.00322265625)
   float Dis_IRServo = -29.642 * Raw_Voltage_IRServo + 72.236;
 
-//  Serial5.print("Servo IR Distance: ");
-//  Serial5.println(Dis_IRServo);
+  //  Serial5.print("Servo IR Distance: ");
+  //  Serial5.println(Dis_IRServo);
   return Dis_IRServo;
-  
+
 }
 // -------------------- Robot Localization Functions --------------------
 
@@ -1321,7 +1377,7 @@ float IRServo() {
 double encodError(double setVal, Wheel W) {
   return abs(W.curr_AngVel) - setVal;
 }
- 
+
 // Solves for the difference between the left and right IR sensors
 double IR_Difference(float IRLeft, float IRRight) {
   return IRLeft - IRRight;
@@ -1339,7 +1395,8 @@ double IR_R_Error(float dis) {
 }
 
 // Solves for the difference in the angle of the robot compared to a set value (in deg)
-double turnError(double setVal) {
+double turnError(double setVal)
+{
   //Serial5.println(
   return setVal - (rad2Deg(robo.curr_Orien - prev_Ang));
 }
@@ -1354,7 +1411,7 @@ double whl_Dist_L()
   return distPerClick(dia_L) * ECount_L;
 }
 
-// Riight Wheel Linear Distance in mm
+// Right Wheel Linear Distance in mm
 double whl_Dist_R()
 {
   return distPerClick(dia_R) * ECount_R;
