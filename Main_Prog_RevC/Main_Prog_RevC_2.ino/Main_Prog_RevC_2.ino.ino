@@ -401,19 +401,19 @@ void loop()
   {
     //theaterChase(strip.Color(127, 0, 0), 50); // Red
     //rainbow(0);
-    Serial.print("Counter: ");
-    Serial.println(counter);
-    Serial.print("Raw Left Distance: ");
-    Serial.print(Dis_IRLeft);
-    Serial.print("\t");
-    Serial.print("Left Distance: ");
-    Serial.print(Distance_IRLeft);
-    Serial.print("\t");
-    Serial.print("Raw Right Distance: ");
-    Serial.print(Dis_IRRight);
-    Serial.print("\t");
-    Serial.print("Right Distance: ");
-    Serial.println(Distance_IRRight);
+//    Serial.print("Counter: ");
+//    Serial.println(counter);
+//    Serial.print("Raw Left Distance: ");
+//    Serial.print(Dis_IRLeft);
+//    Serial.print("\t");
+//    Serial.print("Left Distance: ");
+//    Serial.print(Distance_IRLeft);
+//    Serial.print("\t");
+//    Serial.print("Raw Right Distance: ");
+//    Serial.print(Dis_IRRight);
+//    Serial.print("\t");
+//    Serial.print("Right Distance: ");
+//    Serial.println(Distance_IRRight);
 
     if (detour == false && counter < NUM_CONDITIONS)
     {
@@ -473,10 +473,12 @@ void loop()
       }
 
       // Implement code to do something when the obstacle is seen here
-      if( (Distance_IRFront - Distance_IRServo)  > 10.0)  //(Distance_IRServo < targetDist_Front + 5.0) && (Distance_IRFront > targetDist_Front + 5.0))
+      if(((Distance_IRServo + 2.0) < (targetDist_Front + 5.0)) && (Distance_IRFront > (targetDist_Front + 5.0))) 
       {
         robo_Halt();
-        delay(2000);
+        // turn LEDs on Here
+        delay(7000);
+        // turn LEDs off Here
       }
 
 
@@ -496,16 +498,23 @@ void loop()
 //      if (counter <= 1)
 //      {
         //Turn_Ang(-90);
-        Forward(IR_LR_PID.pid);
-        Serial5.print("Dis_IRLeft: ");
-        Serial5.print(Dis_IRLeft);
-        Serial5.print("\t");
-        Serial5.print("Dis_IRRight: ");
-        Serial5.print(Dis_IRRight);
-        Serial5.print("\t");
-        Serial5.print(whl_R.curr_AngVel);
-        Serial5.print("\t");
-        Serial5.println(whl_L.curr_AngVel);
+        //Forward(IR_LR_PID.pid);
+       Forward(E_L_PID.pid, E_R_PID.pid);
+        Serial.print("Distance_IRServo: ");
+        Serial.print(Distance_IRServo + 2.0);
+        Serial.print("\t");
+        Serial.print("Distance_IRFront: ");
+        Serial.println(Distance_IRFront);
+//        Serial5.print("\t");
+//        Serial5.print(whl_R.curr_AngVel);
+//        Serial5.print("\t");
+//        Serial5.println(whl_L.curr_AngVel);
+ if(((Distance_IRServo + 2.0) < (targetDist_Front + 5.0)) && (Distance_IRFront > (targetDist_Front + 5.0))) //(Distance_IRFront - (Distance_IRServo + 2.0))  < 10.0)
+      {
+        robo_Halt();
+        while(1){}
+        Serial.println("Heyy");
+      }
 //      }
     }
 
