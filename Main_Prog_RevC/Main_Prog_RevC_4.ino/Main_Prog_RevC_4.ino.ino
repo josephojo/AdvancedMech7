@@ -172,7 +172,7 @@ PID IR_LR_PID;
 const double pi = 3.14159265359;
 double waitTimer[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 uint8_t targetPWM = 70; // Baseline pwm for main motors
-double targetSpeed = 2.6;//2.1; //2.5; // 1.7; // Baseline rotational speed for main motors (in rad/sec)
+double targetSpeed = 2.6;//3.0; //2.6;//2.1; //2.5; // 1.7; // Baseline rotational speed for main motors (in rad/sec)
 const double wall_Length = 17.8; // distance from pillar to pillar in cms
 uint8_t counter = 1;
 bool detour = false;
@@ -181,7 +181,7 @@ float targetDist_Side = 11.0; //11.15;
 float targetDist_Front = 8.0; //6.0;
 double prev_Dist = 0.0 ;
 double prev_Ang = 0.0;
-double tempSpeed = 0.0;
+double tempSpeed = targetSpeed;
 float Distance_IRServo = 0.0;
 float Distance_IRLeft = 0.0; //Used for the capped (MIN_DISTANCE & MAX_DISTANCE) values for the left IR sensor
 float Distance_IRFront = 0.0;
@@ -234,7 +234,7 @@ int caseStep [][17] =
 {0,0,1,0,0,0,0,0,0,0,0,90,0,0,0,0,0 },
 {1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0  },
 {0,0,1,0,0,0,0,0,0,0,0,90,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,150,0,0,0,0,0,0},
+{1,0,0,0,1,0,0,0,0,0,70,0,0,0,0,0,0 },
 {1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0  },
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
 {1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0  },
@@ -243,6 +243,7 @@ int caseStep [][17] =
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
 {1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0  },
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
+{1,0,0,0,1,0,0,0,0,0,80,0,0,0,0,0,0 },
 {1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0  },
 {1,0,0,0,1,0,0,0,0,0,150,0,0,0,0,0,0},
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
@@ -330,7 +331,7 @@ void setup()
   delay(5000);
   //
   //counter = 26;
-  tempSpeed = targetSpeed;
+//  tempSpeed = targetSpeed;
 
   start_Time = millis() / 1000;
 }
@@ -842,7 +843,7 @@ void GoForward_Dist(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8
   } else if (PID_LR_IR == 1)
   {
     if(counter == 30)
-      targetSpeed = tempSpeed - 1.0; //1.1;
+      targetSpeed = tempSpeed - 0.6; //1.1;
     Forward(IR_LR_PID.pid);
     Serial5.print("Cntr: "); Serial5.print(counter);
     Serial5.print(" - Go Forward - Using Both IR Sensors - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
@@ -880,7 +881,7 @@ void GoForward_Dist(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8
       IR_LR_PID.resetPID();
       E_L_PID.resetPID();
       E_R_PID.resetPID();
-      //targetSpeed = tempSpeed;
+      targetSpeed = tempSpeed;
       caseStep[counter][15] = 1;
     }
   }
@@ -1199,7 +1200,7 @@ void GoBackward_Dist(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint
 
 //##### Turn Right until Angle is reached
 void TurnRight_Ang(int ang) { // Angle used to be 90 - 10
-  targetSpeed = tempSpeed - 0.6;
+  targetSpeed = tempSpeed - 1.1; //1 0.6;
   Rightward(E_L_PID.pid, E_R_PID.pid);
   Serial5.print("Cntr: "); Serial5.print(counter);
   Serial5.print(" - Turn Right -     Using Encoders    - Until Angle    : "); Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));Serial5.print("Front: ");Serial5.println(Distance_IRFront);Serial5.print(" , Servo: ");Serial5.println(Distance_IRServo);
@@ -1223,7 +1224,7 @@ void TurnRight_Ang(int ang) { // Angle used to be 90 - 10
 //##### Turn Left until Angle is reached
 void TurnLeft_Ang(int ang) // Angle used to be -90 + 7
 {
-  targetSpeed = tempSpeed - 0.6;
+  targetSpeed = tempSpeed - 1.1; 0.6;
   Leftward(E_L_PID.pid, E_R_PID.pid);
   Serial5.print("Cntr: "); Serial5.print(counter);
   Serial5.print(" - Turn Leftt -     Using Encoders    - Until Angle    : "); Serial5.println(rad2Deg(robo.curr_Orien - prev_Ang));Serial5.print("Front: ");Serial5.println(Distance_IRFront);Serial5.print(" , Servo: ");Serial5.println(Distance_IRServo);
@@ -1247,7 +1248,7 @@ void TurnLeft_Ang(int ang) // Angle used to be -90 + 7
 
 //#### Turn until Angle is reached
 void Turn_Ang(int ang) {
-  double tempSpeed = targetSpeed;
+  //double tempSpeed = targetSpeed;
   //targetSpeed = 1.5;
 
   //  Serial5.println("In TurnLeft");
