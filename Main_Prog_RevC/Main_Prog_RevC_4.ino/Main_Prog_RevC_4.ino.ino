@@ -478,8 +478,7 @@ void loop()
       {
         robo_Halt();
         delay(2000);
-        // turn LEDs on Here
-        //rainbow(50);
+        theaterChase(strip.Color(127, 0, 0), 50); // // turn LEDs on Here
         Forward(E_L_PID.pid, E_R_PID.pid);
         delay(1000);
         robo_Halt();
@@ -487,7 +486,7 @@ void loop()
         Backward(E_L_PID.pid, E_R_PID.pid);
         delay(1000);
         robo_Halt();
-        // turn LEDs off Here
+        strip.show();            // turn LEDs off Here
       }
 
 
