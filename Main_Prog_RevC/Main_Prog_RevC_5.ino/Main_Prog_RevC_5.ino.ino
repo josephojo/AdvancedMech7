@@ -46,7 +46,7 @@
 
 #define MAX_DISTANCE 20.0
 #define MIN_DISTANCE 2.0
-#define NUM_CONDITIONS 64
+#define NUM_CONDITIONS 61
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -223,18 +223,13 @@ int caseStep [][17] =
 {1,0,0,0,0,0,1,0,0,0,580,0,0,0,0,0,0},
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
 {1,0,0,0,1,0,0,0,0,0,100,0,0,0,0,0,0},
-{1,0,0,0,0,0,0,1,0,0,161,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,1,70,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0  },
+{1,0,0,0,0,0,0,1,0,0,140,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,1,97,0,0 },
+{0,1,0,0,1,0,0,0,0,0,240,0,0,0,0,0,0},
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
-{1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0  },
-{0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,150,0,0,0,0,0,0},
 {1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0  },
 {0,0,1,0,0,0,0,0,0,0,0,90,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0  },
-{0,0,1,0,0,0,0,0,0,0,0,90,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,70,0,0,0,0,0,0 },
+{1,0,0,0,0,1,0,0,0,0,385,0,0,0,0,0,0},
 {1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0  },
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
 {1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0  },
@@ -253,11 +248,12 @@ int caseStep [][17] =
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
 {1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0  },
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
-{1,0,0,0,1,0,0,0,0,0,150,0,0,0,0,0,0},
+{1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0  },
+{1,0,0,0,1,0,0,0,0,0,120,0,0,0,0,0,0},
 {0,0,1,0,0,0,0,0,0,0,0,90,0,0,0,0,0 },
 {1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0  },
 {0,0,0,1,0,0,0,0,0,0,0,90,0,0,0,0,0 },
-{1,0,0,0,0,0,1,0,0,0,111,0,0,0,0,0,0}
+{1,0,0,0,0,0,1,0,0,0,195,0,0,0,0,0,0}
 };
 
 // ************************* End of Definitions *********************************
@@ -330,7 +326,7 @@ void setup()
 
   delay(5000);
   //
-  //counter = 26;
+  //counter = 23;
 //  tempSpeed = targetSpeed;
 
   start_Time = millis() / 1000;
@@ -474,10 +470,11 @@ void loop()
       }
 
       // Implement code to do something when the obstacle is seen here
-      if(((Distance_IRFront - Distance_IRServo) > 8.0) && Distance_IRServo < targetDist_Front) //((Distance_IRServo < targetDist_Front) && (Distance_IRFront > (targetDist_Front + 5.0))) 
+      if(((Distance_IRFront - Distance_IRServo) > 8.0) && Distance_IRServo < targetDist_Front && (counter < 13 || counter > 48)) //((Distance_IRServo < targetDist_Front) && (Distance_IRFront > (targetDist_Front + 5.0))) 
       {
         robo_Halt();
         delay(2000);
+        //rainbow(5);
         theaterChase(strip.Color(127, 0, 0), 50); // // turn LEDs on Here
         Forward(E_L_PID.pid, E_R_PID.pid);
         delay(1000);
@@ -486,8 +483,9 @@ void loop()
         Backward(E_L_PID.pid, E_R_PID.pid);
         delay(1000);
         robo_Halt();
+        strip.show();
         delay(3000);
-        strip.show();            // turn LEDs off Here
+                    // turn LEDs off Here
       }
 
 
@@ -497,10 +495,15 @@ void loop()
       }
     }
 
-//    if (counter == NUM_CONDITIONS) // Shake the miner off the arm
-//    {
-//      Shake_The_Bag();
-//    }
+    if (counter >= NUM_CONDITIONS) // Shake the miner off the arm
+    {
+      MoveArm_Ang(0);
+      delay(100);
+      while(1)
+      {
+        rainbow(50);
+      }
+    }
 
     if (detour == true)
     {
@@ -843,7 +846,7 @@ void GoForward_Dist(uint8_t PID_encod, uint8_t PID_L_IR, uint8_t PID_R_IR, uint8
   } else if (PID_LR_IR == 1)
   {
     if(counter == 30)
-      targetSpeed = tempSpeed - 0.6; //1.1;
+      targetSpeed = tempSpeed - 1.0; //1.1;
     Forward(IR_LR_PID.pid);
     Serial5.print("Cntr: "); Serial5.print(counter);
     Serial5.print(" - Go Forward - Using Both IR Sensors - Until Distance : "); Serial5.println(abs(robo.curr_Pos - prev_Dist));
